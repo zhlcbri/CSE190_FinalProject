@@ -13,10 +13,16 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\Particles">
+      <UniqueIdentifier>{7092db4c-237f-4dc3-bf01-aa3c38988c5a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Particles.cpp">
+      <Filter>Source Files\Particles</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -32,6 +38,12 @@
     </None>
     <None Include="shader_cube.frag">
       <Filter>Source Files</Filter>
+    </None>
+    <None Include="shader_particle.frag">
+      <Filter>Source Files\Particles</Filter>
+    </None>
+    <None Include="shader_particle.vert">
+      <Filter>Source Files\Particles</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -52,6 +64,9 @@
     </ClInclude>
     <ClInclude Include="Cube.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Particles.h">
+      <Filter>Source Files\Particles</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

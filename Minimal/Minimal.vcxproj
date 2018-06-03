@@ -131,11 +131,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Particles.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="model_loading.frag" />
     <None Include="model_loading.vert" />
     <None Include="packages.config" />
+    <None Include="shader_particle.frag" />
+    <None Include="shader_particle.vert" />
     <None Include="shader_cube.frag" />
     <None Include="shader_cube.vert" />
   </ItemGroup>
@@ -144,6 +147,7 @@
     <ClInclude Include="GameManager.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Model.h" />
+    <ClInclude Include="Particles.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="stb_image.h" />
   </ItemGroup>

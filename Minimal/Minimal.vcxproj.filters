@@ -27,11 +27,14 @@
     <None Include="model_loading.vert">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="shader_cube.vert">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="shader_cube.frag">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Skybox.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="stb_image.h">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -45,6 +48,9 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="GameManager.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Cube.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

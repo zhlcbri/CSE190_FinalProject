@@ -67,7 +67,10 @@ using namespace std;
 using namespace glm;
 
 GameManager * gameManager;
-mat4 handPos[2];
+
+// hand position and orientation
+vec3 handPos[2];
+mat4 handRotation[2];
 
 bool checkFramebufferStatus(GLenum target = GL_FRAMEBUFFER) {
 	GLuint status = glCheckFramebufferStatus(target);
@@ -580,8 +583,11 @@ protected:
 		cerr << "right hand position = " << handPosition[ovrHand_Right].x << ", " << handPosition[ovrHand_Right].y << ", " << handPosition[ovrHand_Right].z << endl;
 
 		// make hand position and orientation global
-		handPos[0] = ovr::toGlm(handPoses[0]);
-		handPos[1] = ovr::toGlm(handPoses[1]);
+		handPos[0] = ovr::toGlm(handPosition[0]);
+		handPos[1] = ovr::toGlm(handPosition[1]);
+		
+		handRotation[0] = toMat4(ovr::toGlm(handPoses[0].Orientation));
+		handRotation[1] = toMat4(ovr::toGlm(handPoses[1].Orientation));
 
 		ovrPosef eyePoses[2];
 		ovr_GetEyePoses(_session, frame, true, _viewScaleDesc.HmdToEyePose, eyePoses, &_sceneLayer.SensorSampleTime);
@@ -639,9 +645,14 @@ protected:
 	}
 
 	void renderScene(const glm::mat4 & projection, const glm::mat4 & headPose) override {
-		mat4 S = scale(mat4(1.0f), vec3(0.5f, 0.5f, 0.5f));
-		mat4 T = translate(mat4(1.0f),vec3(0.0f,0.0f,-10.0f));
-		gameManager->renderHand(projection, headPose, T*S*handPos[0]);
+
+		mat4 T = translate(mat4(1.0f), handPos[0]);
+		mat4 S = scale(mat4(1.0f), vec3(0.005, 0.005, 0.005));
+		mat4 R = handRotation[0];
+		gameManager->renderHand(projection, inverse(headPose), T*R*S);
+
+		mat4 model_skybox = scale(mat4(1.0f), vec3(325.0f, 325.0f, 325.0f));
+		gameManager->renderSkybox(projection, inverse(headPose), model_skybox);
 	}
 
 };

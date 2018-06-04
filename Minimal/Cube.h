@@ -35,6 +35,7 @@
 #include "Shader.h"
 
 using namespace std;
+using namespace glm;
 
 unsigned int myTexture;
 

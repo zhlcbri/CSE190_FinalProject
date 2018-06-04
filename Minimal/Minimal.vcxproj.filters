@@ -68,5 +68,8 @@
     <ClInclude Include="Particles.h">
       <Filter>Source Files\Particles</Filter>
     </ClInclude>
+    <ClInclude Include="Music.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

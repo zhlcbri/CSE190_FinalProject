@@ -6,14 +6,16 @@
 #include "Model.h"
 #include "Cube.h"
 #include "Particles.h"
+#include "Music.h"
 
 using namespace std;
 using namespace glm;
 
 
 //string const path_hand = "Models/baseball_bat/bat.obj"; // &
+string const PATH_HAND = "Models/soccer_ball/soccer_ball.obj";
 
-string const path_hand = "Models/soccer_ball/soccer_ball.obj";
+const char * SOUND_1 = "Audio/my_heart_will_go_on.wav";
 
 const char * MODEL_VERT = "model_loading.vert";
 const char * MODEL_FRAG = "model_loading.frag";
@@ -27,7 +29,9 @@ const char * PARTICLE_FRAG = "shader_particle.frag";
 class GameManager
 {
 public:
-	Model * hand = new Model(path_hand, false);
+	Model * hand = new Model(PATH_HAND, false);
+	Music * music = new Music(SOUND_1);
+
 	Shader shader_model = Shader(MODEL_VERT, MODEL_FRAG);
 	Shader shader_cube = Shader(CUBE_VERT, CUBE_FRAG);
 	Shader shader_particle = Shader(PARTICLE_VERT, PARTICLE_FRAG);
@@ -45,22 +49,15 @@ public:
 	Particles * particles = new Particles();
 
 	GameManager() {
-
+		
 	}
 
 	~GameManager() {
 		delete(hand);
+		delete(music);
+		delete(skybox);
+		delete(particles);
 	}
-
-	//// Selection
-	//Vector3 distanceFromTorso = touchRightHand.transform.position - referencePosition.transform.position;
-	//float magnitude = Vector3.Magnitude(distanceFromTorso);
-
-	//if (magnitude > threshold) {
-	//	magnitude = magnitude + coeff * Mathf.Pow((magnitude - threshold), 2);
-	//}
-
-	//cursor.transform.position = touchRightHand.transform.position + (touchRightHand.transform.forward * magnitude);
 
 	vec3 gogoHand(vec3 handPos, vec3 torsoPos, vec3 handForward) {
 		float threshold = 0.50f;
@@ -91,6 +88,14 @@ public:
 	void renderParticles(mat4 projection, mat4 view, mat4 model) {
 		particles->draw(shader_particle, projection, view, model);
 		particles->update();
+	}
+
+	void playSound() {
+		music->play();
+	}
+
+	void closeSound() {
+		music->close();
 	}
 
 	void renderGame() {

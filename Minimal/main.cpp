@@ -638,10 +638,11 @@ protected:
 		ovr_RecenterTrackingOrigin(_session);
 		
 		gameManager = new GameManager();
+		gameManager->playSound();
 	}
 
 	void shutdownGl() override {
-
+		gameManager->closeSound();
 	}
 
 	void renderScene(const glm::mat4 & projection, const glm::mat4 & headPose) override {
@@ -664,11 +665,15 @@ protected:
 
 		// skybox
 		mat4 model_skybox = scale(mat4(1.0f), vec3(325.0f, 325.0f, 325.0f));
+		
+		
 		gameManager->renderSkybox(projection, inverse(headPose), model_skybox);
 
 		// particle
 		mat4 model_particle = mat4(1.0f);
 		//gameManager->renderParticles(projection, inverse(headPose), model_particle);
+
+
 	}
 
 };

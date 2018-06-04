@@ -11,7 +11,6 @@
 using namespace std;
 using namespace glm;
 
-
 //string const path_hand = "Models/baseball_bat/bat.obj"; // &
 string const PATH_HAND = "Models/soccer_ball/soccer_ball.obj";
 
@@ -103,6 +102,15 @@ public:
 	void renderParticles(mat4 projection, mat4 view, mat4 model) {
 		particles->draw(shader_particle, projection, view, model);
 		particles->update();
+	}
+
+	bool colliding(vec3 hand_pos, vec3 obj_pos, float scale) {
+		float threshold = sqrt(2) * scale;
+		if (glm::distance(hand_pos, obj_pos) <= threshold) {
+			cout << "colliding" << endl;
+			return true;
+		}
+		return false;
 	}
 
 	void playSound() {

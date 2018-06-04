@@ -72,6 +72,15 @@ GameManager * gameManager;
 vec3 handPos[2];
 mat4 handRotation[2];
 
+// button states
+bool button_X = false;
+bool button_Y = false;
+bool button_A = false;
+bool button_B = false;
+bool isPressed = false;
+
+bool doOnce = true; // temp
+
 bool checkFramebufferStatus(GLenum target = GL_FRAMEBUFFER) {
 	GLuint status = glCheckFramebufferStatus(target);
 	switch (status) {
@@ -542,6 +551,27 @@ protected:
 		glGenFramebuffers(1, &_mirrorFbo);
 	}
 
+	void update() final override
+	{
+		// reset booleans
+		button_X = false;
+
+		ovrInputState inputState;
+		if (OVR_SUCCESS(ovr_GetInputState(_session, ovrControllerType_Touch, &inputState)))
+		{
+			// Button controls
+			if (!inputState.Buttons) {
+				isPressed = false;
+			}
+
+			// when 'X' is pressed
+			if ((inputState.Buttons & ovrButton_X) && !isPressed) {
+				isPressed = true;
+				button_X = true;
+			}
+		}
+	}
+
 	void onKey(int key, int scancode, int action, int mods) override {
 		if (GLFW_PRESS == action) switch (key) {
 		case GLFW_KEY_R:
@@ -656,27 +686,32 @@ protected:
 		vec3 gogoPos = gameManager->gogoHand(handPos[0], inverse(headPose)[3], handForward);
 
 		// left hand
-		mat4 T = translate(mat4(1.0f), handPos[0]);
-		mat4 S = scale(mat4(1.0f), vec3(0.005, 0.005, 0.005));
-		mat4 R = handRotation[0];
-		mat4 M_hand = T * R * S;
+		mat4 T_hand = translate(mat4(1.0f), handPos[0]);
+		mat4 S_hand = scale(mat4(1.0f), vec3(0.005, 0.005, 0.005));
+		mat4 R_hand = handRotation[0];
+		mat4 M_hand = T_hand * R_hand * S_hand;
 		//M[3] = vec4(gogoPos, 1.0f);
 		gameManager->renderHand(projection, inverse(headPose), M_hand);
 
 		// skybox
-		mat4 model_skybox = scale(mat4(1.0f), vec3(325.0f, 325.0f, 325.0f));	
-		gameManager->renderSkybox(projection, inverse(headPose), model_skybox);
-
-		// particle
-		mat4 model_particle = mat4(1.0f);
-		//gameManager->renderParticles(projection, inverse(headPose), model_particle);
+		mat4 M_skybox = scale(mat4(1.0f), vec3(325.0f, 325.0f, 325.0f));	
+		gameManager->renderSkybox(projection, inverse(headPose), M_skybox);
 
 		// cubes
-		mat4 T_cubeX = translate(mat4(1.0f), vec3(0.0f, 0.0f, -1.0f));
+		mat4 T_cubeX = translate(mat4(1.0f), vec3(0.0f, 0.0f, -0.5f));
 		mat4 S_cubeX = scale(mat4(1.0f), vec3(0.2f, 0.2f, 0.2f));
 		mat4 M_cubeX = T_cubeX * S_cubeX;
 
-		gameManager->renderCubes(projection, inverse(headPose), M_cubeX);
+		// particles
+		bool beatHit = (gameManager->colliding(vec3(M_hand[3]), vec3(M_cubeX[3]), 0.2f) && button_X);
+
+		if (doOnce && !beatHit) {
+			gameManager->renderCubes(projection, inverse(headPose), M_cubeX);
+		}
+		else {
+			doOnce = false;
+			gameManager->renderParticles(projection, inverse(headPose), M_cubeX);
+		}
 	}
 
 };

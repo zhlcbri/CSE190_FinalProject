@@ -39,11 +39,10 @@ using namespace glm;
 
 class Cube {
 private:
+	char * myID = nullptr; // X, Y, A, B
 
 public:
 	bool cullFront = false;
-	char * myID = nullptr; // X, Y, A, B
-
 	unsigned int myTexture;
 	//unsigned int myTexture_X;
 
@@ -88,6 +87,10 @@ public:
 		glDeleteBuffers(1, &VBO);
 		glDeleteBuffers(1, &EBO);
 	};
+
+	char* getID() {
+		return myID;
+	}
 
 	unsigned int loadCubemap(vector<string> faces)
 	{
@@ -156,37 +159,6 @@ public:
 		glDepthFunc(GL_LESS); // set depth function back to default
 		glCullFace(GL_BACK); // set default cull backface 
 	};
-
-	void drawSkybox(Shader shader, const glm::mat4 & projection, const glm::mat4 & view, const glm::mat4 & model) {
-		glEnable(GL_CULL_FACE);
-
-		shader.use();
-		shader.setMat4("projection", projection);
-		shader.setMat4("view", view);
-		shader.setMat4("model", model);
-
-		glBindVertexArray(VAO);
-
-		glCullFace(GL_FRONT);
-
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, myTexture);
-		shader.setInt("myTex", 0);
-
-		// Enable depth test
-		glEnable(GL_DEPTH_TEST);
-		// Accept fragment if it closer to the camera than the former one
-		glDepthFunc(GL_LESS);
-
-		// Draw triangles
-		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-		glBindVertexArray(0);
-
-		glDepthFunc(GL_LESS); // set depth function back to default
-		glCullFace(GL_BACK); // set default cull backface 
-	}
-
-
 	
 	const GLfloat vertices[8][3] = {
 		//"Front" vertices

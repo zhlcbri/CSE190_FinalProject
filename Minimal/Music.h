@@ -32,7 +32,10 @@ ALvoid *data;
 
 ALCdevice* dev;
 ALCcontext* ctx;
+const int SRATE = 44100;
+const int SSIZE = 1024;
 
+ALint sample;
 using namespace std;
 using namespace glm;
 
@@ -72,10 +75,16 @@ struct WAVE_Data {
 class Music {
 private:
 	const char* file_path;
-
+	
 public:
-
+	int i;
+	//get the playing state
+	ALint playState;
+	ALCsizei val = 0;
+	ALbyte databuffer[22050];
+	ALCdevice *device;
 	Music(const char* path) {
+		i = 9;
 		file_path = path;
 	}
 
@@ -183,7 +192,12 @@ public:
 		alSourcei(source[0], AL_BUFFER, buffer[0]);
 		//alSourcei(source[0], AL_LOOPING, AL_TRUE); //
 		alSourcePlay(source[0]);
-
+		alGetError();
+		device = alcCaptureOpenDevice(NULL, SRATE, AL_FORMAT_STEREO16, SSIZE);
+		if (alGetError() != AL_NO_ERROR) {
+			return;
+		}
+		alcCaptureStart(device);
 
 		return;
 	}
@@ -199,6 +213,28 @@ public:
 		alcMakeContextCurrent(NULL);
 		alcDestroyContext(ctx);
 		alcCloseDevice(dev);
+	}
+
+	void parse() {
+		alcGetIntegerv(device, ALC_CAPTURE_SAMPLES, (ALCsizei)sizeof(ALint), &sample);
+		alcCaptureSamples(device, (ALCvoid *)databuffer, sample);
+		cout << databuffer[i]<<i << endl;
+		i++;
+		/*alcGetIntegerv(dev, ALC_CAPTURE_SAMPLES, (ALCsizei)sizeof(ALint), &val);
+
+		alcCaptureSamples(dev, (ALCvoid *)buffer, val);
+		if (val != 0)
+		{
+			cout << i++ <<val<< endl;
+		}*/
+			/*alGetSourcei(source[0], AL_SOURCE_STATE, &playState);
+			alcCaptureSamples(dev, databuffer, val);
+
+			cout << databuffer[i] << endl;
+			i++;
+			cout << "val is "<<val << endl;;*/
+		
+		
 	}
 };
 

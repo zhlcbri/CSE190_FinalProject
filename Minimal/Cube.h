@@ -37,23 +37,27 @@
 using namespace std;
 using namespace glm;
 
-unsigned int myTexture;
-
 class Cube {
 private:
-	vector<string> myFaces;
 
 public:
 	bool cullFront = false;
+	char * myID = nullptr; // X, Y, A, B
+
+	unsigned int myTexture;
+	//unsigned int myTexture_X;
 
 	GLuint VBO, VAO, EBO;
 	GLuint uProjection, uModelview;
 
-	Cube(vector<string> faces, bool cullFrontFace)
+	Cube(vector<string> faces, bool cullFrontFace, char * ID = nullptr)
 	{
-
-		myFaces = faces;
 		cullFront = cullFrontFace;
+		
+		if (!cullFront && ID != nullptr) {
+			myID = ID;
+		}
+
 		myTexture = loadCubemap(faces);
 
 		// cube VAO
@@ -122,6 +126,7 @@ public:
 	{
 		glEnable(GL_CULL_FACE);
 
+		shader.use();
 		shader.setMat4("projection", projection);
 		shader.setMat4("view", view);
 		shader.setMat4("model", model);
@@ -133,7 +138,36 @@ public:
 		}
 		else {
 			glCullFace(GL_BACK); // otherwise cull back face
-		}
+		}		
+
+		shader.setInt("myTex", 0);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, myTexture);
+
+		// Enable depth test
+		glEnable(GL_DEPTH_TEST);
+		// Accept fragment if it closer to the camera than the former one
+		glDepthFunc(GL_LESS);
+
+		// Draw triangles
+		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+		glBindVertexArray(0);
+
+		glDepthFunc(GL_LESS); // set depth function back to default
+		glCullFace(GL_BACK); // set default cull backface 
+	};
+
+	void drawSkybox(Shader shader, const glm::mat4 & projection, const glm::mat4 & view, const glm::mat4 & model) {
+		glEnable(GL_CULL_FACE);
+
+		shader.use();
+		shader.setMat4("projection", projection);
+		shader.setMat4("view", view);
+		shader.setMat4("model", model);
+
+		glBindVertexArray(VAO);
+
+		glCullFace(GL_FRONT);
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, myTexture);
@@ -150,12 +184,10 @@ public:
 
 		glDepthFunc(GL_LESS); // set depth function back to default
 		glCullFace(GL_BACK); // set default cull backface 
-	};
+	}
 
 
-	// Define the coordinates and indices needed to draw the cube. Note that it is not necessary
-	// to use a 2-dimensional array, since the layout in memory is the same as a 1-dimensional array.
-	// This just looks nicer since it's easy to tell what coordinates/indices belong where.
+	
 	const GLfloat vertices[8][3] = {
 		//"Front" vertices
 		{ -1.0, -1.0,  1.0 },{ 1.0, -1.0,  1.0 },{ 1.0,  1.0,  1.0 },{ -1.0,  1.0,  1.0 },
@@ -164,8 +196,6 @@ public:
 	    { -1.0, -1.0, -1.0 },{ 1.0, -1.0, -1.0 },{ 1.0,  1.0, -1.0 },{ -1.0,  1.0, -1.0 }
 	};
 
-	// Note that GL_QUADS is deprecated in modern OpenGL (and removed from OSX systems).
-	// This is why we need to draw each face as 2 triangles instead of 1 quadrilateral
 	const GLuint indices[6][6] = {
 		// Front face
 		{ 0, 1, 2, 2, 3, 0 },

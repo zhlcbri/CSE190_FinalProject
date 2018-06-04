@@ -3,12 +3,12 @@
 #ifndef MUSIC_H
 #define MUSIC_H
 
-#include "al.h"
-#include "alc.h"
+//#include "al.h"
+//#include "alc.h"
 #include <glm/glm.hpp>
 #include <iostream>
-//#include <al.h>
-//#include <alc.h>
+#include <al.h>
+#include <alc.h>
 
 #define NUM_BUFFERS 2
 //#define NUM_SOURCES 2
@@ -166,7 +166,7 @@ public:
 	void init() {
 		alListenerfv(AL_POSITION, listenerPos);
 		alListenerfv(AL_VELOCITY, listenerVel);
-		alListenerfv(AL_ORIENTATION, listenerOri);
+		alListenerfv(AL_ORIENTATION, listenerOri); 
 
 		// Generate buffers, or else no sound will happen!
 		alGenSources(NUM_SOURCES, source);
@@ -184,19 +184,8 @@ public:
 		//alSourcei(source[0], AL_LOOPING, AL_TRUE); //
 		alSourcePlay(source[0]);
 
-		return;
-	}
 
-	int playSound() {
-		ALCdevice* dev = alcOpenDevice(NULL);
-		ALCcontext* ctx = alcCreateContext(dev, NULL);
-		alcMakeContextCurrent(ctx);
-		init();
-		while (1); //
-		alcMakeContextCurrent(NULL);
-		alcDestroyContext(ctx);
-		alcCloseDevice(dev);
-		return 0;
+		return;
 	}
 
 	void play() {

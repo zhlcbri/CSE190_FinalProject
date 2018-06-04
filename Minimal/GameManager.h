@@ -43,10 +43,22 @@ public:
 		"Skybox/down.ppm",
 		"Skybox/right.ppm",
 		"Skybox/left.ppm",
+		"Skybox/left.ppm",
+	};
+
+	vector<string> faces_X = {
+		"CubeTex/x.ppm",
+		"CubeTex/x.ppm",
+		"CubeTex/x.ppm",
+		"CubeTex/x.ppm",
+		"CubeTex/x.ppm",
+		"CubeTex/x.ppm",
 	};
 
 	Cube * skybox = new Cube(faces_skybox, true);
 	Particles * particles = new Particles();
+
+	Cube * cube_X = new Cube(faces_X, false, "X");
 
 	GameManager() {
 		
@@ -81,8 +93,11 @@ public:
 	}
 
 	void renderSkybox(mat4 projection, mat4 view, mat4 model) {
-		shader_cube.use();
 		skybox->draw(shader_cube, projection, view, model);
+	}
+
+	void renderCubes(mat4 projection, mat4 view, mat4 model) {
+		cube_X->draw(shader_cube, projection, view, model);
 	}
 
 	void renderParticles(mat4 projection, mat4 view, mat4 model) {

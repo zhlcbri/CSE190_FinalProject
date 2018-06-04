@@ -566,8 +566,8 @@ protected:
 		handStatus[0] = trackState.HandStatusFlags[0];
 		handStatus[1] = trackState.HandStatusFlags[1];
 		// Display status for debug purposes:
-		cerr << "handStatus[left]  = " << handStatus[ovrHand_Left] << endl;
-		cerr << "handStatus[right] = " << handStatus[ovrHand_Right] << endl;
+		//cerr << "handStatus[left]  = " << handStatus[ovrHand_Left] << endl;
+		//cerr << "handStatus[right] = " << handStatus[ovrHand_Right] << endl;
 
 		// Process controller position and orientation:
 		ovrPosef handPoses[2];  // These are position and orientation in meters in room coordinates, relative to tracking origin. Right-handed cartesian coordinates.
@@ -579,8 +579,8 @@ protected:
 		handPosition[0] = handPoses[0].Position;
 		handPosition[1] = handPoses[1].Position;
 		// Display positions for debug purposes:
-		cerr << "left hand position  = " << handPosition[ovrHand_Left].x << ", " << handPosition[ovrHand_Left].y << ", " << handPosition[ovrHand_Left].z << endl;
-		cerr << "right hand position = " << handPosition[ovrHand_Right].x << ", " << handPosition[ovrHand_Right].y << ", " << handPosition[ovrHand_Right].z << endl;
+		//cerr << "left hand position  = " << handPosition[ovrHand_Left].x << ", " << handPosition[ovrHand_Left].y << ", " << handPosition[ovrHand_Left].z << endl;
+		//cerr << "right hand position = " << handPosition[ovrHand_Right].x << ", " << handPosition[ovrHand_Right].y << ", " << handPosition[ovrHand_Right].z << endl;
 
 		// make hand position and orientation global
 		handPos[0] = ovr::toGlm(handPosition[0]);
@@ -659,27 +659,30 @@ protected:
 		mat4 T = translate(mat4(1.0f), handPos[0]);
 		mat4 S = scale(mat4(1.0f), vec3(0.005, 0.005, 0.005));
 		mat4 R = handRotation[0];
-		mat4 M = T * R * S;
+		mat4 M_hand = T * R * S;
 		//M[3] = vec4(gogoPos, 1.0f);
-		gameManager->renderHand(projection, inverse(headPose), M);
+		gameManager->renderHand(projection, inverse(headPose), M_hand);
 
 		// skybox
-		mat4 model_skybox = scale(mat4(1.0f), vec3(325.0f, 325.0f, 325.0f));
-		
-		
+		mat4 model_skybox = scale(mat4(1.0f), vec3(325.0f, 325.0f, 325.0f));	
 		gameManager->renderSkybox(projection, inverse(headPose), model_skybox);
 
 		// particle
 		mat4 model_particle = mat4(1.0f);
 		//gameManager->renderParticles(projection, inverse(headPose), model_particle);
 
+		// cubes
+		mat4 T_cubeX = translate(mat4(1.0f), vec3(0.0f, 0.0f, -1.0f));
+		mat4 S_cubeX = scale(mat4(1.0f), vec3(0.2f, 0.2f, 0.2f));
+		mat4 M_cubeX = T_cubeX * S_cubeX;
 
+		gameManager->renderCubes(projection, inverse(headPose), M_cubeX);
 	}
 
 };
 
 // Execute our example class
-int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
+int main(int argc, char ** argv) {
 	int result = -1;
 	try {
 		if (!OVR_SUCCESS(ovr_Initialize(nullptr))) {

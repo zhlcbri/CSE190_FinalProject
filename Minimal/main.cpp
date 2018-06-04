@@ -677,20 +677,11 @@ protected:
 
 	void renderScene(const glm::mat4 & projection, const glm::mat4 & headPose) override {
 
-		// gogo algorithm
-		vec3 handForward = vec3(1.0f);
-		handForward.x = sin(handRotation[0][3].y);
-		handForward.y = -tan(handRotation[0][3].x);
-		handForward.z = cos(handRotation[0][3].y);
-
-		vec3 gogoPos = gameManager->gogoHand(handPos[0], inverse(headPose)[3], handForward);
-
 		// left hand
 		mat4 T_hand = translate(mat4(1.0f), handPos[0]);
 		mat4 S_hand = scale(mat4(1.0f), vec3(0.005, 0.005, 0.005));
 		mat4 R_hand = handRotation[0];
 		mat4 M_hand = T_hand * R_hand * S_hand;
-		//M[3] = vec4(gogoPos, 1.0f);
 		gameManager->renderHand(projection, inverse(headPose), M_hand);
 
 		// skybox

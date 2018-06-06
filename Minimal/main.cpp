@@ -68,6 +68,7 @@ using namespace glm;
 
 GameManager * gameManager;
 vec3 cube_track = vec3(0, 2.0, -0.5);
+vec3 hand_track = vec3(1.0f);
 float deg = 0.5f;
 float angle_r = 0.0f;
 // hand position and orientation
@@ -682,13 +683,27 @@ protected:
 		if (angle_r > 360.0f || angle_r < -360.0f) angle_r = 0.0f;
 		
 
+		//// left hand
+		//mat4 T_hand = translate(mat4(1.0f), handPos[0]);
+		//mat4 S_hand = scale(mat4(1.0f), vec3(0.005, 0.005, 0.005));
+		//mat4 R_hand = handRotation[0];
+		//mat4 M_hand = T_hand * R_hand * S_hand;
+		//gameManager->renderHand(projection, inverse(headPose), M_hand);
+		// gogo algorithm
+		vec3 handForward = normalize(handPos[0] - hand_track);//
+		handForward.x = sin(handRotation[0][3].y);
+		handForward.y = -tan(handRotation[0][3].x);
+		handForward.z = cos(handRotation[0][3].y);
+
+		vec3 gogoPos = gameManager->gogoHand(handPos[0], inverse(headPose)[3], handForward);
+
 		// left hand
-		mat4 T_hand = translate(mat4(1.0f), handPos[0]);
+		mat4 T_hand = translate(mat4(1.0f), gogoPos);
 		mat4 S_hand = scale(mat4(1.0f), vec3(0.005, 0.005, 0.005));
 		mat4 R_hand = handRotation[0];
 		mat4 M_hand = T_hand * R_hand * S_hand;
+		//M[3] = vec4(gogoPos, 1.0f);
 		gameManager->renderHand(projection, inverse(headPose), M_hand);
-
 		// skybox
 		mat4 M_skybox = scale(mat4(1.0f), vec3(325.0f, 325.0f, 325.0f));	
 		gameManager->renderSkybox(projection, inverse(headPose), M_skybox);
@@ -710,6 +725,7 @@ protected:
 			doOnce = false;
 			gameManager->renderParticles(projection, inverse(headPose), M_cubeX);
 		}
+		hand_track = handPos[0];
 		cube_track.y -= 0.001;
 	}
 

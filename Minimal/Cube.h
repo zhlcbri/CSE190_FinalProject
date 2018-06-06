@@ -44,6 +44,7 @@ private:
 public:
 	bool cullFront = false;
 	unsigned int myTexture;
+	mat4 toWorld;
 	//unsigned int myTexture_X;
 
 	GLuint VBO, VAO, EBO;
@@ -182,6 +183,7 @@ public:
 	    // Right face
 	    { 3, 2, 6, 6, 7, 3 }
 	};
+
 
 };
 

@@ -67,7 +67,9 @@ using namespace std;
 using namespace glm;
 
 GameManager * gameManager;
-
+vec3 cube_track = vec3(0, 2.0, -0.5);
+float deg = 0.5f;
+float angle_r = 0.0f;
 // hand position and orientation
 vec3 handPos[2];
 mat4 handRotation[2];
@@ -495,7 +497,7 @@ protected:
 
 	void initGl() override {
 		GlfwApp::initGl();
-
+		
 		// Disable the v-sync for buffer swap
 		glfwSwapInterval(0);
 
@@ -676,6 +678,9 @@ protected:
 	}
 
 	void renderScene(const glm::mat4 & projection, const glm::mat4 & headPose) override {
+		angle_r += deg;
+		if (angle_r > 360.0f || angle_r < -360.0f) angle_r = 0.0f;
+		
 
 		// left hand
 		mat4 T_hand = translate(mat4(1.0f), handPos[0]);
@@ -689,9 +694,11 @@ protected:
 		gameManager->renderSkybox(projection, inverse(headPose), M_skybox);
 
 		// cubes
-		mat4 T_cubeX = translate(mat4(1.0f), vec3(0.0f, 0.0f, -0.5f));
-		mat4 S_cubeX = scale(mat4(1.0f), vec3(0.2f, 0.2f, 0.2f));
-		mat4 M_cubeX = T_cubeX * S_cubeX;
+
+		mat4 T_cubeX = translate(mat4(1.0f), cube_track);
+		mat4 S_cubeX = scale(mat4(1.0f), vec3(0.1f, 0.1f, 0.1f));
+		mat4 R_cubeX = rotate(mat4(1.0f), angle_r / 180.0f*pi<float>(), vec3(0.0, 1.0, 0.0));
+		mat4 M_cubeX = T_cubeX * R_cubeX *S_cubeX;
 
 		// particles
 		bool beatHit = (gameManager->colliding(vec3(M_hand[3]), vec3(M_cubeX[3]), 0.2f) && button_X);
@@ -703,7 +710,9 @@ protected:
 			doOnce = false;
 			gameManager->renderParticles(projection, inverse(headPose), M_cubeX);
 		}
+		cube_track.y -= 0.001;
 	}
+
 
 };
 

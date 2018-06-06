@@ -14,7 +14,7 @@ using namespace glm;
 //string const path_hand = "Models/baseball_bat/bat.obj"; // &
 string const PATH_HAND = "Models/soccer_ball/soccer_ball.obj";
 
-const char * SOUND_1 = "Audio/my_heart_will_go_on.wav";
+const char * SOUND_1 = "Audio/flowers_of_fire.wav";
 
 const char * MODEL_VERT = "model_loading.vert";
 const char * MODEL_FRAG = "model_loading.frag";
@@ -25,6 +25,7 @@ const char * CUBE_FRAG = "shader_cube.frag";
 const char * PARTICLE_VERT = "shader_particle.vert";
 const char * PARTICLE_FRAG = "shader_particle.frag";
 
+mat4 fall = glm::translate(glm::mat4(1.0f), vec3(0.0f, -0.1f, 0.0f));
 class GameManager
 {
 public:
@@ -58,7 +59,7 @@ public:
 	Particles * particles = new Particles();
 
 	Cube * cube_X = new Cube(faces_X, false, "X");
-
+	
 	GameManager() {
 		
 	}
@@ -123,6 +124,8 @@ public:
 
 	void renderGame() {
 	}
+
+	
 
 };
 

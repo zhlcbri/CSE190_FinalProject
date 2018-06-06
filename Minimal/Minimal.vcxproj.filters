@@ -16,6 +16,15 @@
     <Filter Include="Source Files\Particles">
       <UniqueIdentifier>{7092db4c-237f-4dc3-bf01-aa3c38988c5a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Model">
+      <UniqueIdentifier>{aa9694bc-2490-49a1-b185-0a7cf3773370}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Shader">
+      <UniqueIdentifier>{78df3475-6362-4f91-bdce-da4a171adf8a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gist">
+      <UniqueIdentifier>{2411a0f6-ac6f-4e55-9f2e-164cc68094f8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -24,39 +33,60 @@
     <ClCompile Include="Particles.cpp">
       <Filter>Source Files\Particles</Filter>
     </ClCompile>
+    <ClCompile Include="..\Gist-master\src\Gist.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Gist-master\src\core\CoreFrequencyDomainFeatures.cpp">
+      <Filter>Source Files\gist</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Gist-master\src\core\CoreTimeDomainFeatures.cpp">
+      <Filter>Source Files\gist</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Gist-master\src\fft\WindowFunctions.cpp">
+      <Filter>Source Files\gist</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Gist-master\src\mfcc\MFCC.cpp">
+      <Filter>Source Files\gist</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Gist-master\src\onset-detection-functions\OnsetDetectionFunction.cpp">
+      <Filter>Source Files\gist</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Gist-master\src\pitch\Yin.cpp">
+      <Filter>Source Files\gist</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Gist-master\libs\kiss_fft130\kiss_fft.c">
+      <Filter>Source Files\gist</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="model_loading.frag">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="model_loading.vert">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="shader_cube.vert">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="shader_cube.frag">
-      <Filter>Source Files</Filter>
-    </None>
     <None Include="shader_particle.frag">
       <Filter>Source Files\Particles</Filter>
     </None>
     <None Include="shader_particle.vert">
       <Filter>Source Files\Particles</Filter>
     </None>
+    <None Include="model_loading.frag">
+      <Filter>Source Files\Shader</Filter>
+    </None>
+    <None Include="model_loading.vert">
+      <Filter>Source Files\Shader</Filter>
+    </None>
+    <None Include="shader_cube.frag">
+      <Filter>Source Files\Shader</Filter>
+    </None>
+    <None Include="shader_cube.vert">
+      <Filter>Source Files\Shader</Filter>
+    </None>
+    <None Include="..\Gist-master\libs\kiss_fft130\COPYING">
+      <Filter>Source Files\gist</Filter>
+    </None>
+    <None Include="..\Gist-master\libs\kiss_fft130\README">
+      <Filter>Source Files\gist</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stb_image.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Model.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Mesh.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Shader.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="GameManager.h">
@@ -70,6 +100,45 @@
     </ClInclude>
     <ClInclude Include="Music.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>Source Files\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>Source Files\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader.h">
+      <Filter>Source Files\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Gist-master\src\Gist.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Gist-master\src\core\CoreFrequencyDomainFeatures.h">
+      <Filter>Source Files\gist</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Gist-master\src\core\CoreTimeDomainFeatures.h">
+      <Filter>Source Files\gist</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Gist-master\src\fft\WindowFunctions.h">
+      <Filter>Source Files\gist</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Gist-master\src\mfcc\MFCC.h">
+      <Filter>Source Files\gist</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Gist-master\src\onset-detection-functions\OnsetDetectionFunction.h">
+      <Filter>Source Files\gist</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Gist-master\src\pitch\Yin.h">
+      <Filter>Source Files\gist</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Gist-master\libs\kiss_fft130\_kiss_fft_guts.h">
+      <Filter>Source Files\gist</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Gist-master\libs\kiss_fft130\kiss_fft.h">
+      <Filter>Source Files\gist</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Gist-master\libs\kiss_fft130\kissfft.hh">
+      <Filter>Source Files\gist</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

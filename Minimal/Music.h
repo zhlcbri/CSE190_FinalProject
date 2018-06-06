@@ -9,7 +9,7 @@
 #include <iostream>
 #include <al.h>
 #include <alc.h>
-
+//#include "Gist.h"
 #define NUM_BUFFERS 2
 //#define NUM_SOURCES 2
 #define NUM_SOURCES 1

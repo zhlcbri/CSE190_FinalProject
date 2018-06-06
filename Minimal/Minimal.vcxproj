@@ -90,10 +90,13 @@
       <AdditionalIncludeDirectories>$(SolutionDir)\Include\LibOVR;$(MSBuildThisFileDirectory)include;C:\Program Files\OpenAL 1.1 SDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <AdditionalOptions>-DUSE_KISS_FFT</AdditionalOptions>
     </ClCompile>
     <Link>
       <AdditionalDependencies>LibOVR.lib;opengl32.lib;glu32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;OpenAL32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)\lib;C:\Program Files\OpenAL 1.1 SDK\libs\Win64</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\lib;C:\Program Files\OpenAL 1.1 SDK\libs\Win64;D:\CSE190_FinalProject\Gist-master</AdditionalLibraryDirectories>
+      <AdditionalOptions>-DUSE_FFTW</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -131,10 +134,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\Gist-master\libs\kiss_fft130\kiss_fft.c" />
+    <ClCompile Include="..\Gist-master\src\core\CoreFrequencyDomainFeatures.cpp" />
+    <ClCompile Include="..\Gist-master\src\core\CoreTimeDomainFeatures.cpp" />
+    <ClCompile Include="..\Gist-master\src\fft\WindowFunctions.cpp" />
+    <ClCompile Include="..\Gist-master\src\Gist.cpp" />
+    <ClCompile Include="..\Gist-master\src\mfcc\MFCC.cpp" />
+    <ClCompile Include="..\Gist-master\src\onset-detection-functions\OnsetDetectionFunction.cpp" />
+    <ClCompile Include="..\Gist-master\src\pitch\Yin.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Particles.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\Gist-master\libs\kiss_fft130\COPYING" />
+    <None Include="..\Gist-master\libs\kiss_fft130\README" />
     <None Include="model_loading.frag" />
     <None Include="model_loading.vert" />
     <None Include="packages.config" />
@@ -144,6 +157,16 @@
     <None Include="shader_cube.vert" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Gist-master\libs\kiss_fft130\kissfft.hh" />
+    <ClInclude Include="..\Gist-master\libs\kiss_fft130\kiss_fft.h" />
+    <ClInclude Include="..\Gist-master\libs\kiss_fft130\_kiss_fft_guts.h" />
+    <ClInclude Include="..\Gist-master\src\core\CoreFrequencyDomainFeatures.h" />
+    <ClInclude Include="..\Gist-master\src\core\CoreTimeDomainFeatures.h" />
+    <ClInclude Include="..\Gist-master\src\fft\WindowFunctions.h" />
+    <ClInclude Include="..\Gist-master\src\Gist.h" />
+    <ClInclude Include="..\Gist-master\src\mfcc\MFCC.h" />
+    <ClInclude Include="..\Gist-master\src\onset-detection-functions\OnsetDetectionFunction.h" />
+    <ClInclude Include="..\Gist-master\src\pitch\Yin.h" />
     <ClInclude Include="Cube.h" />
     <ClInclude Include="GameManager.h" />
     <ClInclude Include="Music.h" />
@@ -161,6 +184,8 @@
     <Import Project="..\packages\glm.0.9.8.5\build\native\glm.targets" Condition="Exists('..\packages\glm.0.9.8.5\build\native\glm.targets')" />
     <Import Project="..\packages\Assimp.redist.3.0.0\build\native\Assimp.redist.targets" Condition="Exists('..\packages\Assimp.redist.3.0.0\build\native\Assimp.redist.targets')" />
     <Import Project="..\packages\Assimp.3.0.0\build\native\Assimp.targets" Condition="Exists('..\packages\Assimp.3.0.0\build\native\Assimp.targets')" />
+    <Import Project="..\packages\libfftw.redist.3.3.4\build\native\libfftw.redist.targets" Condition="Exists('..\packages\libfftw.redist.3.3.4\build\native\libfftw.redist.targets')" />
+    <Import Project="..\packages\libfftw.3.3.4\build\native\libfftw.targets" Condition="Exists('..\packages\libfftw.3.3.4\build\native\libfftw.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -172,5 +197,7 @@
     <Error Condition="!Exists('..\packages\glm.0.9.8.5\build\native\glm.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\glm.0.9.8.5\build\native\glm.targets'))" />
     <Error Condition="!Exists('..\packages\Assimp.redist.3.0.0\build\native\Assimp.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Assimp.redist.3.0.0\build\native\Assimp.redist.targets'))" />
     <Error Condition="!Exists('..\packages\Assimp.3.0.0\build\native\Assimp.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Assimp.3.0.0\build\native\Assimp.targets'))" />
+    <Error Condition="!Exists('..\packages\libfftw.redist.3.3.4\build\native\libfftw.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\libfftw.redist.3.3.4\build\native\libfftw.redist.targets'))" />
+    <Error Condition="!Exists('..\packages\libfftw.3.3.4\build\native\libfftw.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\libfftw.3.3.4\build\native\libfftw.targets'))" />
   </Target>
 </Project>

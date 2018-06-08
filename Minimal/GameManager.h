@@ -3,6 +3,7 @@
 #ifndef GAMEMANAGER_H
 #define GAMEMANAGER_H
 
+#include <random>
 #include "Model.h"
 #include "Cube.h"
 #include "Particles.h"
@@ -24,6 +25,8 @@ const char * CUBE_FRAG = "shader_cube.frag";
 
 const char * PARTICLE_VERT = "shader_particle.vert";
 const char * PARTICLE_FRAG = "shader_particle.frag";
+
+vec3 cube_track = vec3(0, 2.0, -0.5);
 
 mat4 fall = glm::translate(glm::mat4(1.0f), vec3(0.0f, -0.1f, 0.0f));
 class GameManager
@@ -71,11 +74,14 @@ public:
 		delete(particles);
 	}
 
-	vec3 gogoHand(vec3 handPos, vec3 torsoPos, vec3 handForward) {
-		float threshold = 0.50f;
-		float coeff = 15.0f;
+	void renderGame() {
+	}
 
-		float distFromTorso = length(handPos - torsoPos);
+	vec3 gogoHand(vec3 handPos, vec3 torsoPos, vec3 handForward) {
+		float threshold = 0.50f; // D
+		float coeff = 7.5f; // k
+
+		float distFromTorso = length(handPos - torsoPos); // R_r
 		if (distFromTorso > threshold) {
 			distFromTorso = distFromTorso + coeff * powf((distFromTorso - threshold), 2);
 		}
@@ -96,24 +102,21 @@ public:
 		skybox->draw(shader_cube, projection, view, model);
 	}
 
-	void renderCubes(mat4 projection, mat4 view, mat4 model) {
-		//cout << "push all file to avoid null pointer exception" << endl;
-		cube_X->draw(shader_cube, projection, view, model);
-	}
-
 	void renderParticles(mat4 projection, mat4 view, mat4 model) {
 		particles->draw(shader_particle, projection, view, model);
 		particles->update();
 	}
 
 	bool colliding(vec3 hand_pos, vec3 obj_pos, float scale) {
-		float threshold = sqrt(2) * scale;
+		float threshold = (float)sqrt(2) * scale;
 		if (glm::distance(hand_pos, obj_pos) <= threshold) {
 			cout << "colliding" << endl;
 			return true;
 		}
 		return false;
 	}
+
+	//============== Sound stuff =================
 
 	void playSound() {
 		music->play();
@@ -123,29 +126,40 @@ public:
 		music->close();
 	}
 
-	void renderGame() {
+	
+
+	//============ Cube stuff ================
+	void renderCubes(mat4 projection, mat4 view, mat4 model) {
+		//cout << "push all file to avoid null pointer exception" << endl;
+		cube_X->draw(shader_cube, projection, view, model);
 	}
 
-	//============ randomize X Y A B cubes ================
-	void randomizeCubes() {
-
+	Cube* getRandomCube() {
+		return cube_X;
 	}
 
-	void dropCubes(mat4 T, mat4 R, mat4 S, mat4 projection, mat4 view) {
-		/*mat4 T_cubeX = translate(mat4(1.0f), cube_track);
-		mat4 S_cubeX = scale(mat4(1.0f), vec3(0.1f, 0.1f, 0.1f));
-		mat4 R_cubeX = rotate(mat4(1.0f), angle_r / 180.0f*pi<float>(), vec3(0.0, 1.0, 0.0));
-		mat4 M_cubeX = T_cubeX * R_cubeX * S_cubeX;*/
+	void dropCubes(mat4 T, mat4 S, mat4 projection, mat4 view) {
+		Cube* cube = getRandomCube();
 
-		cube_X->translate(T);
-		cube_X->rotate(R);
-		cube_X->scale(S);
+		cube->translate(T);
+		cube->scale(S);
 
-		cube_X->draw(shader_cube, projection, view);
+		cube->draw(shader_cube, projection, view);
 	}
 
-	void rainCubes(mat4 projection, mat4 view) {
+	void rainCubes(mat4 projection, mat4 view) {	
+		mat4 S = scale(mat4(1.0f), vec3(0.1f, 0.1f, 0.1f));
+		
+		default_random_engine generator;
+		uniform_real_distribution<float> distribution(-0.2, -2.0);
 
+		// randomize T matrix
+		for (int i = 0; i < 10; i++) {
+			float z = distribution(generator);
+			cube_track.z = z;
+			mat4 T = translate(mat4(1.0f), cube_track);
+			dropCubes(T, S, projection, view);
+		}
 	}
 };
 

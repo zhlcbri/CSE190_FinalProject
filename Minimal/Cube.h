@@ -37,6 +37,9 @@
 using namespace std;
 using namespace glm;
 
+float deg = 0.5f;
+float angle_r = 0.0f;
+
 class Cube {
 private:
 	char * myID = nullptr; // X, Y, A, B
@@ -108,7 +111,12 @@ public:
 		S = scaleMatrix;
 	}
 
+	void spin() {
+		R = glm::rotate(mat4(1.0f), angle_r / 180.0f*pi<float>(), vec3(0.0, 1.0, 0.0));
+	}
+
 	void update() {
+		spin();
 		toWorld = T * R * S;
 	}
 

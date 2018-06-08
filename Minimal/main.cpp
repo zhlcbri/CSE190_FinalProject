@@ -69,14 +69,13 @@ using namespace glm;
 GameManager * gameManager;
 
 //======= move to GameManager ==========
-vec3 cube_track = vec3(0, 2.0, -0.5);
 vec3 hand_track = vec3(1.0f);
-float deg = 0.5f;
-float angle_r = 0.0f;
 
 // hand position and orientation
+vec3 handPos_prev[2]; // temp
 vec3 handPos[2];
 mat4 handRotation[2];
+quat handOrientation[2]; // temp
 
 // button states
 bool button_X = false;
@@ -625,6 +624,11 @@ protected:
 		handRotation[0] = toMat4(ovr::toGlm(handPoses[0].Orientation));
 		handRotation[1] = toMat4(ovr::toGlm(handPoses[1].Orientation));
 
+		// temp; try quaternion
+		handOrientation[0] = quat_cast(handRotation[0]);
+		handOrientation[1] = quat_cast(handRotation[1]);
+		//
+
 		ovrPosef eyePoses[2];
 		ovr_GetEyePoses(_session, frame, true, _viewScaleDesc.HmdToEyePose, eyePoses, &_sceneLayer.SensorSampleTime);
 
@@ -653,6 +657,10 @@ protected:
 		glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mirrorTextureId, 0);
 		glBlitFramebuffer(0, 0, _mirrorSize.x, _mirrorSize.y, 0, _mirrorSize.y, _mirrorSize.x, 0, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+
+		//======= store hand positions from last frame
+		handPos_prev[0] = handPos[0];
+		handPos_prev[1] = handPos[1];
 	}
 
 	virtual void renderScene(const glm::mat4 & projection, const glm::mat4 & headPose) = 0;
@@ -681,31 +689,43 @@ protected:
 		gameManager->closeSound();
 	}
 
+	// temp
+	vec3 getForwardVector(quat q) {
+		float x = q.x;
+		float y = q.y;
+		float z = q.z;
+		float w = q.w;
+
+		const float x2 = 2.0f * x;
+		const float y2 = 2.0f * y;
+		const float z2 = 2.0f * z;
+		const float x2w = x2 * w;
+		const float y2w = y2 * w;
+		const float x2x = x2 * x;
+		const float z2x = z2 * x;
+		const float y2y = y2 * y;
+		const float z2y = z2 * y;
+
+		return vec3(z2x + y2w, z2y - x2w, 1.0f - (x2x + y2y));
+	}
+
 	void renderScene(const glm::mat4 & projection, const glm::mat4 & headPose) override {
+		// update cube spinning angle
 		angle_r += deg;
 		if (angle_r > 360.0f || angle_r < -360.0f) angle_r = 0.0f;
-		
 
-		//// left hand
-		//mat4 T_hand = translate(mat4(1.0f), handPos[0]);
-		//mat4 S_hand = scale(mat4(1.0f), vec3(0.005, 0.005, 0.005));
-		//mat4 R_hand = handRotation[0];
-		//mat4 M_hand = T_hand * R_hand * S_hand;
-		//gameManager->renderHand(projection, inverse(headPose), M_hand);
 		// gogo algorithm
-		vec3 handForward = normalize(handPos[0] - hand_track);//
-		handForward.x = sin(handRotation[0][3].y);
-		handForward.y = -tan(handRotation[0][3].x);
-		handForward.z = cos(handRotation[0][3].y);
+		//vec3 handForward = handPos[0] - handPos_prev[0];
 
-		vec3 gogoPos = gameManager->gogoHand(handPos[0], inverse(headPose)[3], handForward);
+		vec3 handForward = getForwardVector(handOrientation[0]);
+		vec3 gogoPos = gameManager->gogoHand(handPos[0], inverse(headPose)[3], -(handForward));
 
 		// =========== left hand ==============
 		mat4 T_hand = translate(mat4(1.0f), gogoPos);
+		//mat4 T_hand = translate(mat4(1.0f), handPos[0]);
 		mat4 S_hand = scale(mat4(1.0f), vec3(0.005, 0.005, 0.005));
 		mat4 R_hand = handRotation[0];
 		mat4 M_hand = T_hand * R_hand * S_hand;
-		//M[3] = vec4(gogoPos, 1.0f);
 		gameManager->renderHand(projection, inverse(headPose), M_hand);
 
 		//============== skybox ===============
@@ -722,7 +742,8 @@ protected:
 		bool beatHit = (gameManager->colliding(vec3(M_hand[3]), vec3(M_cubeX[3]), 0.2f) && button_X);
 
 		if (doOnce && !beatHit) {
-			gameManager->renderCubes(projection, inverse(headPose), M_cubeX);
+			//gameManager->dropCubes(T_cubeX, S_cubeX, projection, inverse(headPose));
+			//gameManager->rainCubes(projection, inverse(headPose));
 		}
 		else {
 			doOnce = false;
@@ -730,6 +751,8 @@ protected:
 		}
 		hand_track = handPos[0];
 		cube_track.y -= 0.001;
+
+		
 	}
 
 

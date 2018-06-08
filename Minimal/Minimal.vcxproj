@@ -151,6 +151,8 @@
     <None Include="model_loading.frag" />
     <None Include="model_loading.vert" />
     <None Include="packages.config" />
+    <None Include="shader_cloud.frag" />
+    <None Include="shader_disk.frag" />
     <None Include="shader_particle.frag" />
     <None Include="shader_particle.vert" />
     <None Include="shader_cube.frag" />

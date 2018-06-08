@@ -8,7 +8,8 @@
 #include "Cube.h"
 #include "Particles.h"
 #include "Music.h"
-
+#include <cstdlib>
+#include <ctime>
 using namespace std;
 using namespace glm;
 
@@ -32,6 +33,7 @@ mat4 fall = glm::translate(glm::mat4(1.0f), vec3(0.0f, -0.1f, 0.0f));
 class GameManager
 {
 public:
+	int counter = 0;
 	Model * hand = new Model(PATH_HAND, false);
 	Music * music = new Music(SOUND_1);
 
@@ -103,7 +105,9 @@ public:
 	}
 
 	void renderParticles(mat4 projection, mat4 view, mat4 model) {
-		particles->draw(shader_particle, projection, view, model);
+		srand(time(0)); // particles have strange but cool effect
+		int index = rand() % 11;
+		particles->draw(shader_particle, projection, view, model, index);
 		particles->update();
 	}
 
@@ -145,18 +149,29 @@ public:
 		cube->draw(shader_cube, projection, view);
 	}
 
+	bool duplicate(float z, vector<float> v) {
+		for (int i = 0; i < v.size(); i++) {
+			cout << "z is " << z << "v is " << v[i] << endl;
+			if (abs(v[i]- z)<0.1)
+				return false;
+		}
+		//using binary search if this is not enough
+		return true;
+	}
+
 	void rainCubes(mat4 projection, mat4 view) {	
 		mat4 S = scale(mat4(1.0f), vec3(0.1f, 0.1f, 0.1f));
-		
-		default_random_engine generator;
-		uniform_real_distribution<float> distribution(-0.2, -2.0);
-
+	
 		// randomize T matrix
 		for (int i = 0; i < 10; i++) {
-			float z = distribution(generator);
-			cube_track.z = z;
+			if (i < 5)
+				cube_track.x = -i * 0.4;
+			else {
+				cube_track.x = i * 0.4;
+			}
 			mat4 T = translate(mat4(1.0f), cube_track);
 			dropCubes(T, S, projection, view);
+			
 		}
 	}
 };

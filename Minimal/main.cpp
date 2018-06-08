@@ -593,15 +593,9 @@ protected:
 		ovrTrackingState trackState = ovr_GetTrackingState(_session, displayMidpointSeconds, ovrTrue);
 
 		// Process controller status. Useful to know if controller is being used at all, and if the cameras can see it. 
-		// Bits reported:
-		// Bit 1: ovrStatus_OrientationTracked  = Orientation is currently tracked (connected and in use)
-		// Bit 2: ovrStatus_PositionTracked     = Position is currently tracked (false if out of range)
 		unsigned int handStatus[2];
 		handStatus[0] = trackState.HandStatusFlags[0];
 		handStatus[1] = trackState.HandStatusFlags[1];
-		// Display status for debug purposes:
-		//cerr << "handStatus[left]  = " << handStatus[ovrHand_Left] << endl;
-		//cerr << "handStatus[right] = " << handStatus[ovrHand_Right] << endl;
 
 		// Process controller position and orientation:
 		ovrPosef handPoses[2];  // These are position and orientation in meters in room coordinates, relative to tracking origin. Right-handed cartesian coordinates.
@@ -612,9 +606,6 @@ protected:
 		ovrVector3f handPosition[2];
 		handPosition[0] = handPoses[0].Position;
 		handPosition[1] = handPoses[1].Position;
-		// Display positions for debug purposes:
-		//cerr << "left hand position  = " << handPosition[ovrHand_Left].x << ", " << handPosition[ovrHand_Left].y << ", " << handPosition[ovrHand_Left].z << endl;
-		//cerr << "right hand position = " << handPosition[ovrHand_Right].x << ", " << handPosition[ovrHand_Right].y << ", " << handPosition[ovrHand_Right].z << endl;
 
 		// make hand position and orientation global
 		handPos[0] = ovr::toGlm(handPosition[0]);
@@ -623,10 +614,9 @@ protected:
 		handRotation[0] = toMat4(ovr::toGlm(handPoses[0].Orientation));
 		handRotation[1] = toMat4(ovr::toGlm(handPoses[1].Orientation));
 
-		// temp; try quaternion
+		// hand rotation in quaternion; used to compute hand forward vector
 		handQuaternion[0] = quat_cast(handRotation[0]);
 		handQuaternion[1] = quat_cast(handRotation[1]);
-		//
 
 		ovrPosef eyePoses[2];
 		ovr_GetEyePoses(_session, frame, true, _viewScaleDesc.HmdToEyePose, eyePoses, &_sceneLayer.SensorSampleTime);
@@ -734,8 +724,8 @@ protected:
 		bool beatHit = (gameManager->colliding(vec3(M_hand[3]), vec3(M_cubeX[3]), 0.2f) && button_X);
 
 		if (doOnce && !beatHit) {
-			//gameManager->dropCubes(T_cubeX, S_cubeX, projection, inverse(headPose));
-			gameManager->rainCubes(projection, inverse(headPose));
+			gameManager->dropCubes(T_cubeX, S_cubeX, projection, inverse(headPose));
+			//gameManager->rainCubes(projection, inverse(headPose));
 		}
 		else {
 			doOnce = false;
@@ -743,12 +733,9 @@ protected:
 		}
 		hand_track = handPos[0];
 		cube_track.y -= 0.001;
-
-		
 	}
-
-
 };
+
 
 // Execute our example class
 int main(int argc, char ** argv) {

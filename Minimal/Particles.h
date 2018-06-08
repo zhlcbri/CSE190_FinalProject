@@ -34,7 +34,7 @@ public:
     int life;
     int visible;
     
-    void draw(Shader, const glm::mat4&, const glm::mat4&, const glm::mat4&);
+    void draw(Shader, const glm::mat4&, const glm::mat4&, const glm::mat4&, int);
     void setVisible();
 
     // These variables are needed for the shader program

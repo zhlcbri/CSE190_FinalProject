@@ -84,6 +84,12 @@
     <None Include="model_loading.vert">
       <Filter>Source Files\Model</Filter>
     </None>
+    <None Include="shader_cloud.frag">
+      <Filter>Source Files\Shader</Filter>
+    </None>
+    <None Include="shader_disk.frag">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stb_image.h">

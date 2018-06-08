@@ -75,7 +75,7 @@ Particles::Particles()
 	colors.push_back(vec3(1.000, 0.941, 0.961)); // lavender blush
 }
 
-void Particles::draw(Shader shader, const mat4 & projection, const mat4 & view, const mat4 & model)
+void Particles::draw(Shader shader, const mat4 & projection, const mat4 & view, const mat4 & model, int index)
 {
 	if (visible)
 	{
@@ -84,10 +84,12 @@ void Particles::draw(Shader shader, const mat4 & projection, const mat4 & view, 
 		shader.setMat4("view", view);
 		shader.setMat4("model", model);
 
+		if (index >= 0 && index < colors.size() - 1) {
+			shader.setVec3("color", colors.at(index));
+		}
 		// set random color
-
-		int index = rand() % colors.size();
-		shader.setVec3("color", colors.at(index));
+		//int index = rand() % colors.size();
+		shader.setVec3("color", colors.at(1));
 
 		glBindVertexArray(quadVAO);
 		glDrawArraysInstanced(GL_TRIANGLES, 0, 6, 10000);

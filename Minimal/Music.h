@@ -3,12 +3,12 @@
 #ifndef MUSIC_H
 #define MUSIC_H
 
-//#include "al.h"
-//#include "alc.h"
+#include "al.h"
+#include "alc.h"
 #include <glm/glm.hpp>
 #include <iostream>
-#include <al.h>
-#include <alc.h>
+//#include <al.h>
+//#include <alc.h>
 //#include "Gist.h"
 #define NUM_BUFFERS 2
 //#define NUM_SOURCES 2

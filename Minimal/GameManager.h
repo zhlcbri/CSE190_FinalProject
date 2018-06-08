@@ -97,7 +97,7 @@ public:
 	}
 
 	void renderCubes(mat4 projection, mat4 view, mat4 model) {
-		cout << "push all file to avoid null pointer exception" << endl;
+		//cout << "push all file to avoid null pointer exception" << endl;
 		cube_X->draw(shader_cube, projection, view, model);
 	}
 
@@ -126,8 +126,27 @@ public:
 	void renderGame() {
 	}
 
-	
+	//============ randomize X Y A B cubes ================
+	void randomizeCubes() {
 
+	}
+
+	void dropCubes(mat4 T, mat4 R, mat4 S, mat4 projection, mat4 view) {
+		/*mat4 T_cubeX = translate(mat4(1.0f), cube_track);
+		mat4 S_cubeX = scale(mat4(1.0f), vec3(0.1f, 0.1f, 0.1f));
+		mat4 R_cubeX = rotate(mat4(1.0f), angle_r / 180.0f*pi<float>(), vec3(0.0, 1.0, 0.0));
+		mat4 M_cubeX = T_cubeX * R_cubeX * S_cubeX;*/
+
+		cube_X->translate(T);
+		cube_X->rotate(R);
+		cube_X->scale(S);
+
+		cube_X->draw(shader_cube, projection, view);
+	}
+
+	void rainCubes(mat4 projection, mat4 view) {
+
+	}
 };
 
 #endif

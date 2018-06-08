@@ -40,25 +40,28 @@ using namespace glm;
 class Cube {
 private:
 	char * myID = nullptr; // X, Y, A, B
+	mat4 T = mat4(1.0f); // translation 
+	mat4 R = mat4(1.0f); // rotation 
+	mat4 S = mat4(1.0f); // scale
+	mat4 toWorld = mat4(1.0f); // assign to T * R * S every frame
 
 public:
 	bool cullFront = false;
 	unsigned int myTexture;
-	mat4 toWorld;
-	//unsigned int myTexture_X;
 
 	GLuint VBO, VAO, EBO;
 	GLuint uProjection, uModelview;
 
-	Cube(vector<string> faces, bool cullFrontFace, char * ID = nullptr)
+	Cube(vector<string> faces, bool cullFrontFace, char * ID = nullptr, mat4 model = mat4(1.0f))
 	{
 		cullFront = cullFrontFace;
-		
+
 		if (!cullFront && ID != nullptr) {
 			myID = ID;
 		}
 
 		myTexture = loadCubemap(faces);
+		toWorld = model;
 
 		// cube VAO
 		glGenVertexArrays(1, &VAO);
@@ -91,6 +94,22 @@ public:
 
 	char* getID() {
 		return myID;
+	}
+
+	void translate(mat4 translationMatrix) {
+		T = translationMatrix;
+	}
+
+	void rotate(mat4 rotationMatrix) {
+		R = rotationMatrix;
+	}
+
+	void scale(mat4 scaleMatrix) {
+		S = scaleMatrix;
+	}
+
+	void update() {
+		toWorld = T * R * S;
 	}
 
 	unsigned int loadCubemap(vector<string> faces)
@@ -126,6 +145,46 @@ public:
 		return textureID;
 	};
 
+	//=============== draw using toWorld every frame ================
+	void draw(Shader shader, const glm::mat4 & projection, const glm::mat4 & view)
+	{
+		update(); // get toWorld for this frame
+
+		glEnable(GL_CULL_FACE);
+
+		shader.use();
+		shader.setMat4("projection", projection);
+		shader.setMat4("view", view);
+		shader.setMat4("model", toWorld);
+
+		glBindVertexArray(VAO);
+
+		if (cullFront) {
+			glCullFace(GL_FRONT); // If drawing skybox cull front face
+		}
+		else {
+			glCullFace(GL_BACK); // otherwise cull back face
+		}
+
+		shader.setInt("myTex", 0);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, myTexture);
+
+		// Enable depth test
+		glEnable(GL_DEPTH_TEST);
+
+		// Accept fragment if it closer to the camera than the former one
+		glDepthFunc(GL_LESS);
+
+		// Draw triangles
+		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+		glBindVertexArray(0);
+
+		glDepthFunc(GL_LESS); // set depth function back to default
+		glCullFace(GL_BACK); // set default cull backface 
+	};
+
+	//=============== draw using designated model matrix ================
 	void draw(Shader shader, const glm::mat4 & projection, const glm::mat4 & view, const glm::mat4 & model)
 	{
 		glEnable(GL_CULL_FACE);

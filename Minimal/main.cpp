@@ -72,10 +72,9 @@ GameManager * gameManager;
 vec3 hand_track = vec3(1.0f);
 
 // hand position and orientation
-vec3 handPos_prev[2]; // temp
 vec3 handPos[2];
 mat4 handRotation[2];
-quat handOrientation[2]; // temp
+quat handQuaternion[2]; // temp
 
 // button states
 bool button_X = false;
@@ -625,8 +624,8 @@ protected:
 		handRotation[1] = toMat4(ovr::toGlm(handPoses[1].Orientation));
 
 		// temp; try quaternion
-		handOrientation[0] = quat_cast(handRotation[0]);
-		handOrientation[1] = quat_cast(handRotation[1]);
+		handQuaternion[0] = quat_cast(handRotation[0]);
+		handQuaternion[1] = quat_cast(handRotation[1]);
 		//
 
 		ovrPosef eyePoses[2];
@@ -657,10 +656,6 @@ protected:
 		glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mirrorTextureId, 0);
 		glBlitFramebuffer(0, 0, _mirrorSize.x, _mirrorSize.y, 0, _mirrorSize.y, _mirrorSize.x, 0, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-
-		//======= store hand positions from last frame
-		handPos_prev[0] = handPos[0];
-		handPos_prev[1] = handPos[1];
 	}
 
 	virtual void renderScene(const glm::mat4 & projection, const glm::mat4 & headPose) = 0;
@@ -689,7 +684,6 @@ protected:
 		gameManager->closeSound();
 	}
 
-	// temp
 	vec3 getForwardVector(quat q) {
 		float x = q.x;
 		float y = q.y;
@@ -715,9 +709,7 @@ protected:
 		if (angle_r > 360.0f || angle_r < -360.0f) angle_r = 0.0f;
 
 		// gogo algorithm
-		//vec3 handForward = handPos[0] - handPos_prev[0];
-
-		vec3 handForward = getForwardVector(handOrientation[0]);
+		vec3 handForward = getForwardVector(handQuaternion[0]);
 		vec3 gogoPos = gameManager->gogoHand(handPos[0], inverse(headPose)[3], -(handForward));
 
 		// =========== left hand ==============
@@ -743,7 +735,7 @@ protected:
 
 		if (doOnce && !beatHit) {
 			//gameManager->dropCubes(T_cubeX, S_cubeX, projection, inverse(headPose));
-			//gameManager->rainCubes(projection, inverse(headPose));
+			gameManager->rainCubes(projection, inverse(headPose));
 		}
 		else {
 			doOnce = false;

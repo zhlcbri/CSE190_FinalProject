@@ -16,8 +16,11 @@
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <vector>
+#include <cstdlib>
 
 #include "Shader.h"
+
+using namespace std;
 
 class Particles
 {
@@ -37,6 +40,9 @@ public:
     // These variables are needed for the shader program
     GLuint quadVAO, quadVBO, instVBO, transVBO;
     GLuint uProjection, uModelview, uView, uModel;
+
+	// beautiful colors sent to shader randomly
+	vector<glm::vec3> colors;
 };
 
 static const GLfloat quadv[] =

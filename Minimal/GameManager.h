@@ -126,11 +126,9 @@ public:
 		music->close();
 	}
 
-	
 
 	//============ Cube stuff ================
 	void renderCubes(mat4 projection, mat4 view, mat4 model) {
-		//cout << "push all file to avoid null pointer exception" << endl;
 		cube_X->draw(shader_cube, projection, view, model);
 	}
 

@@ -66,12 +66,6 @@
     <None Include="shader_particle.vert">
       <Filter>Source Files\Particles</Filter>
     </None>
-    <None Include="model_loading.frag">
-      <Filter>Source Files\Shader</Filter>
-    </None>
-    <None Include="model_loading.vert">
-      <Filter>Source Files\Shader</Filter>
-    </None>
     <None Include="shader_cube.frag">
       <Filter>Source Files\Shader</Filter>
     </None>
@@ -83,6 +77,12 @@
     </None>
     <None Include="..\Gist-master\libs\kiss_fft130\README">
       <Filter>Source Files\gist</Filter>
+    </None>
+    <None Include="model_loading.frag">
+      <Filter>Source Files\Model</Filter>
+    </None>
+    <None Include="model_loading.vert">
+      <Filter>Source Files\Model</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

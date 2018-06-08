@@ -21,6 +21,6 @@ void main()
 
 	//fcolor = acolor;
     
-	fcolor = color;
+	fcolor = acolor;
 	sampleExtraOutput = 1.0f;
 }

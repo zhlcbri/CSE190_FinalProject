@@ -89,7 +89,7 @@ void Particles::draw(Shader shader, const mat4 & projection, const mat4 & view, 
 		}
 		// set random color
 		//int index = rand() % colors.size();
-		shader.setVec3("color", colors.at(1));
+		shader.setVec3("color", colors.at(0));
 
 		glBindVertexArray(quadVAO);
 		glDrawArraysInstanced(GL_TRIANGLES, 0, 6, 10000);

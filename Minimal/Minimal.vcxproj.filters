@@ -25,6 +25,12 @@
     <Filter Include="Source Files\gist">
       <UniqueIdentifier>{2411a0f6-ac6f-4e55-9f2e-164cc68094f8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Text">
+      <UniqueIdentifier>{cffd053b-85c9-4c1a-97ae-7b20a8c6c2a5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Cube">
+      <UniqueIdentifier>{ddbabaa4-4e33-42ae-85e8-e4fbe46b0cc2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -57,6 +63,9 @@
     <ClCompile Include="..\Gist-master\libs\kiss_fft130\kiss_fft.c">
       <Filter>Source Files\gist</Filter>
     </ClCompile>
+    <ClCompile Include="OpenGLText\OpenGLText.cpp">
+      <Filter>Source Files\Text</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -65,12 +74,6 @@
     </None>
     <None Include="shader_particle.vert">
       <Filter>Source Files\Particles</Filter>
-    </None>
-    <None Include="shader_cube.frag">
-      <Filter>Source Files\Shader</Filter>
-    </None>
-    <None Include="shader_cube.vert">
-      <Filter>Source Files\Shader</Filter>
     </None>
     <None Include="..\Gist-master\libs\kiss_fft130\COPYING">
       <Filter>Source Files\gist</Filter>
@@ -90,15 +93,24 @@
     <None Include="shader_disk.frag">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="shader_cube.vert">
+      <Filter>Source Files\Cube</Filter>
+    </None>
+    <None Include="shader_cube.frag">
+      <Filter>Source Files\Cube</Filter>
+    </None>
+    <None Include="OpenGLText\shader_text.frag">
+      <Filter>Source Files\Text</Filter>
+    </None>
+    <None Include="OpenGLText\shader_text.vert">
+      <Filter>Source Files\Text</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stb_image.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="GameManager.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Cube.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Particles.h">
@@ -145,6 +157,15 @@
     </ClInclude>
     <ClInclude Include="..\Gist-master\libs\kiss_fft130\kissfft.hh">
       <Filter>Source Files\gist</Filter>
+    </ClInclude>
+    <ClInclude Include="Cube.h">
+      <Filter>Source Files\Cube</Filter>
+    </ClInclude>
+    <ClInclude Include="OpenGLText\OpenGLText.h">
+      <Filter>Source Files\Text</Filter>
+    </ClInclude>
+    <ClInclude Include="OpenGLText\tga.h">
+      <Filter>Source Files\Text</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

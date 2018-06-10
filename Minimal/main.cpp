@@ -733,6 +733,9 @@ protected:
 		}
 		hand_track = handPos[0];
 		cube_track.y -= 0.001;
+
+		//============ score text ===============
+		gameManager->renderScore();
 	}
 };
 

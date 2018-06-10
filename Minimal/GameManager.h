@@ -8,6 +8,8 @@
 #include "Cube.h"
 #include "Particles.h"
 #include "Music.h"
+#include "OpenGLText/OpenGLText.h"
+
 #include <cstdlib>
 #include <ctime>
 using namespace std;
@@ -34,8 +36,9 @@ class GameManager
 {
 public:
 	int counter = 0;
-	Model * hand = new Model(PATH_HAND, false);
-	Music * music = new Music(SOUND_1);
+	Model * hand;
+	Music * music;
+	OpenGLText scoreText;
 
 	Shader shader_model = Shader(MODEL_VERT, MODEL_FRAG);
 	Shader shader_cube = Shader(CUBE_VERT, CUBE_FRAG);
@@ -60,14 +63,30 @@ public:
 		"CubeTex/x.ppm",
 	};
 
-	Cube * skybox = new Cube(faces_skybox, true);
-	Particles * particles = new Particles();
+	Cube * skybox;
+	Cube * cube_X;
+	Particles * particles;
 
-	Cube * cube_X = new Cube(faces_X, false, "X");
+	const char *FONT_NAME = "baub_16";
+	int CANVAS_WIDTH = 10;
+	int CANVAS_HEIGHT = 10;
 	
 	GameManager() {
-		
+		hand = new Model(PATH_HAND, false);
+		music = new Music(SOUND_1);
+
+		skybox = new Cube(faces_skybox, true);
+		cube_X = new Cube(faces_X, false, "X");
+		particles = new Particles();
 	}
+
+	bool init() {
+		if (!scoreText.init(FONT_NAME, CANVAS_WIDTH, CANVAS_HEIGHT)) {
+			return false;
+		}
+		return true;
+	}
+
 
 	~GameManager() {
 		delete(hand);
@@ -173,6 +192,25 @@ public:
 			dropCubes(T, S, projection, view);
 			
 		}
+	}
+
+	//============== Text Stuff ==================
+	void renderScore() {
+		// temp init(); place elsewhere later
+		//init();
+		if (!scoreText.init(FONT_NAME, CANVAS_WIDTH, CANVAS_HEIGHT)) {
+			//cout << "init failed" << endl;
+			return;
+		}
+		scoreText.beginString();
+		float* bbStr = new float[2];
+		char *tmpStr = "Hello World";
+		scoreText.stringSize(tmpStr, bbStr);
+		// 0.0 are place holders for xPos and yPos
+		scoreText.drawString(10.0 - bbStr[0]*0.5, 5.0 - bbStr[1], tmpStr, 0, 0xF0F0F0F0);
+
+		//
+		scoreText.endString(); // will render the whole at once
 	}
 };
 

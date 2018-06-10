@@ -143,6 +143,7 @@
     <ClCompile Include="..\Gist-master\src\onset-detection-functions\OnsetDetectionFunction.cpp" />
     <ClCompile Include="..\Gist-master\src\pitch\Yin.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="OpenGLText\OpenGLText.cpp" />
     <ClCompile Include="Particles.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -150,6 +151,8 @@
     <None Include="..\Gist-master\libs\kiss_fft130\README" />
     <None Include="model_loading.frag" />
     <None Include="model_loading.vert" />
+    <None Include="OpenGLText\shader_text.frag" />
+    <None Include="OpenGLText\shader_text.vert" />
     <None Include="packages.config" />
     <None Include="shader_cloud.frag" />
     <None Include="shader_disk.frag" />
@@ -174,6 +177,8 @@
     <ClInclude Include="Music.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Model.h" />
+    <ClInclude Include="OpenGLText\OpenGLText.h" />
+    <ClInclude Include="OpenGLText\tga.h" />
     <ClInclude Include="Particles.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="stb_image.h" />

@@ -568,10 +568,15 @@ bool OpenGLText::init(const char * fontName, int w, int h)
 			glTextureParameterf(m_fontTex, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			glTextureParameterf(m_fontTex, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);*/
 
-			glTextureParameterfEXT(m_fontTex, GL_TEXTURE_MIN_FILTER, GL_NEAREST, 1.0f);
+			glTexParameterf(m_fontTex, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glTexParameterf(m_fontTex, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			glTexParameterf(m_fontTex, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameterf(m_fontTex, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+			/*glTextureParameterfEXT(m_fontTex, GL_TEXTURE_MIN_FILTER, GL_NEAREST, 1.0f);
             glTextureParameterfEXT(m_fontTex, GL_TEXTURE_MAG_FILTER, GL_NEAREST, 1.0f);
             glTextureParameterfEXT(m_fontTex, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE, 1.0f);
-            glTextureParameterfEXT(m_fontTex, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE, 1.0f);
+            glTextureParameterfEXT(m_fontTex, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE, 1.0f);*/
             GLenum err = glGetError();
 			//cout << "err: " << err << endl;
         }

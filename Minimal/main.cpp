@@ -559,6 +559,9 @@ protected:
 	{
 		// reset booleans
 		button_X = false;
+		button_Y = false;
+		button_A = false;
+		button_B = false;
 
 		ovrInputState inputState;
 		if (OVR_SUCCESS(ovr_GetInputState(_session, ovrControllerType_Touch, &inputState)))
@@ -572,6 +575,28 @@ protected:
 			if ((inputState.Buttons & ovrButton_X) && !isPressed) {
 				isPressed = true;
 				button_X = true;
+				cout << 'X' << endl;
+			}
+
+			// when 'Y' is pressed
+			if ((inputState.Buttons & ovrButton_Y) && !isPressed) {
+				isPressed = true;
+				button_Y = true;
+				cout << 'Y' << endl;
+			}
+
+			// when 'A' is pressed
+			if ((inputState.Buttons & ovrButton_A) && !isPressed) {
+				isPressed = true;
+				button_A = true;
+				cout << 'A' << endl;
+			}
+
+			// when 'B' is pressed
+			if ((inputState.Buttons & ovrButton_B) && !isPressed) {
+				isPressed = true;
+				button_B = true;
+				cout << 'B' << endl;
 			}
 		}
 	}
@@ -693,16 +718,23 @@ protected:
 		return vec3(z2x + y2w, z2y - x2w, 1.0f - (x2x + y2y));
 	}
 
+	// Implement after rainCube algorithm is done
+	bool correctHit() {
+		bool hit = false;
+
+
+		return hit;
+	}
+
 	void renderScene(const glm::mat4 & projection, const glm::mat4 & headPose) override {
 		// update cube spinning angle
 		angle_r += deg;
 		if (angle_r > 360.0f || angle_r < -360.0f) angle_r = 0.0f;
 
-		// gogo algorithm
-		vec3 handForward = getForwardVector(handQuaternion[0]);
-		vec3 gogoPos = gameManager->gogoHand(handPos[0], inverse(headPose)[3], -(handForward));
-
 		// =========== left hand ==============
+		vec3 handForward = getForwardVector(handQuaternion[0]);
+		vec3 gogoPos = gameManager->gogoHand(handPos[0], inverse(headPose)[3], -(handForward)); // gogo algorithm
+
 		mat4 T_hand = translate(mat4(1.0f), gogoPos);
 		//mat4 T_hand = translate(mat4(1.0f), handPos[0]);
 		mat4 S_hand = scale(mat4(1.0f), vec3(0.005, 0.005, 0.005));
@@ -710,9 +742,11 @@ protected:
 		mat4 M_hand = T_hand * R_hand * S_hand;
 		gameManager->renderHand(projection, inverse(headPose), M_hand);
 
+
 		//============== skybox ===============
 		mat4 M_skybox = scale(mat4(1.0f), vec3(325.0f, 325.0f, 325.0f));	
 		gameManager->renderSkybox(projection, inverse(headPose), M_skybox);
+
 
 		// ============ cubes ==============
 		mat4 T_cubeX = translate(mat4(1.0f), cube_track);
@@ -720,10 +754,12 @@ protected:
 		mat4 R_cubeX = rotate(mat4(1.0f), angle_r / 180.0f*pi<float>(), vec3(0.0, 1.0, 0.0));
 		mat4 M_cubeX = T_cubeX * R_cubeX * S_cubeX;
 
-		//=========== particles =============
-		bool beatHit = (gameManager->colliding(vec3(M_hand[3]), vec3(M_cubeX[3]), 0.2f) && button_X);
 
-		if (doOnce && !beatHit) {
+		//=========== particles =============
+		bool colliding = (gameManager->colliding(vec3(M_hand[3]), vec3(M_cubeX[3]), 0.2f) && button_X);
+
+		if (doOnce && !colliding) {
+			//gameManager->renderCubes(projection, inverse(headPose));
 			gameManager->dropCubes(T_cubeX, S_cubeX, projection, inverse(headPose));
 			//gameManager->rainCubes(projection, inverse(headPose));
 		}
@@ -734,8 +770,9 @@ protected:
 		hand_track = handPos[0];
 		cube_track.y -= 0.001;
 
+
 		//============ score text ===============
-		gameManager->renderScore();
+		//gameManager->renderScore();
 	}
 };
 

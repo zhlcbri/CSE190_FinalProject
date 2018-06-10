@@ -30,8 +30,11 @@ const char * PARTICLE_VERT = "shader_particle.vert";
 const char * PARTICLE_FRAG = "shader_particle.frag";
 
 vec3 cube_track = vec3(0, 2.0, -0.5);
+mat4 T_cubeX = translate(mat4(1.0f), cube_track);
+mat4 S_cubeX = scale(mat4(1.0f), vec3(0.1f, 0.1f, 0.1f));
 
 mat4 fall = glm::translate(glm::mat4(1.0f), vec3(0.0f, -0.1f, 0.0f));
+
 class GameManager
 {
 public:
@@ -55,16 +58,46 @@ public:
 	};
 
 	vector<string> faces_X = {
-		"CubeTex/x.ppm",
-		"CubeTex/x.ppm",
-		"CubeTex/x.ppm",
-		"CubeTex/x.ppm",
-		"CubeTex/x.ppm",
-		"CubeTex/x.ppm",
+		"CubeTex/img_X.ppm",
+		"CubeTex/img_X.ppm",
+		"CubeTex/img_X.ppm",
+		"CubeTex/img_X.ppm",
+		"CubeTex/img_X.ppm",
+		"CubeTex/img_X.ppm",
+	};
+
+	vector<string> faces_Y = {
+		"CubeTex/img_Y.ppm",
+		"CubeTex/img_Y.ppm",
+		"CubeTex/img_Y.ppm",
+		"CubeTex/img_Y.ppm",
+		"CubeTex/img_Y.ppm",
+		"CubeTex/img_Y.ppm",
+	};
+
+	vector<string> faces_A = {
+		"CubeTex/img_A.ppm",
+		"CubeTex/img_A.ppm",
+		"CubeTex/img_A.ppm",
+		"CubeTex/img_A.ppm",
+		"CubeTex/img_A.ppm",
+		"CubeTex/img_A.ppm",
+	};
+
+	vector<string> faces_B = {
+		"CubeTex/img_B.ppm",
+		"CubeTex/img_B.ppm",
+		"CubeTex/img_B.ppm",
+		"CubeTex/img_B.ppm",
+		"CubeTex/img_B.ppm",
+		"CubeTex/img_B.ppm",
 	};
 
 	Cube * skybox;
 	Cube * cube_X;
+	Cube * cube_Y;
+	Cube * cube_A;
+	Cube * cube_B;
 	Particles * particles;
 
 	const char *FONT_NAME = "baub_16";
@@ -77,6 +110,10 @@ public:
 
 		skybox = new Cube(faces_skybox, true);
 		cube_X = new Cube(faces_X, false, "X");
+		cube_Y = new Cube(faces_X, false, "Y");
+		cube_A = new Cube(faces_X, false, "A");
+		cube_B = new Cube(faces_X, false, "B");
+
 		particles = new Particles();
 	}
 
@@ -92,6 +129,10 @@ public:
 		delete(hand);
 		delete(music);
 		delete(skybox);
+		delete(cube_X);
+		delete(cube_Y);
+		delete(cube_A);
+		delete(cube_B);
 		delete(particles);
 	}
 
@@ -139,6 +180,7 @@ public:
 		return false;
 	}
 
+
 	//============== Sound stuff =================
 
 	void playSound() {
@@ -151,10 +193,6 @@ public:
 
 
 	//============ Cube stuff ================
-	void renderCubes(mat4 projection, mat4 view, mat4 model) {
-		cube_X->draw(shader_cube, projection, view, model);
-	}
-
 	Cube* getRandomCube() {
 		return cube_X;
 	}
@@ -166,6 +204,10 @@ public:
 		cube->scale(S);
 
 		cube->draw(shader_cube, projection, view);
+	}
+
+	void renderCubes(mat4 projection, mat4 view) {
+		dropCubes(T_cubeX, S_cubeX, projection, view);
 	}
 
 	bool duplicate(float z, vector<float> v) {

@@ -16,18 +16,48 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 ************************************************************************************/
+#include <OVR_Avatar.h>
+
+#include <GL/glew.h>
+
+#include <SDL.h>
+#include <SDL_opengl.h>
+
+#include <OVR_CAPI.h>
+#include <OVR_CAPI_GL.h>
+#include <OVR_Platform.h>
+
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/transform.hpp>
+#include <glm/gtx/matrix_decompose.hpp>
+
+#include <malloc.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string>
+#include <map>
+#include <chrono>
 
 #include <iostream>
 #include <memory>
 #include <exception>
 #include <algorithm>
-
+#include <rpc/client.h>
+#include <rpc/rpc_error.h>
 #include <Windows.h>
-
+#include "mandelbrot.h"
+#include "rpc/client.h"
+#include "Vector3d.hpp"
 #define __STDC_FORMAT_MACROS 1
 
 #define FAIL(X) throw std::runtime_error(X)
+#define MIRROR_SAMPLE_APP_ID "958062084316416"
+#define MIRROR_WINDOW_WIDTH 800
+#define MIRROR_WINDOW_HEIGHT 600
 
+// Disable MIRROR_ALLOW_OVR to force 2D rendering
+#define MIRROR_ALLOW_OVR true
 ///////////////////////////////////////////////////////////////////////////////
 //
 // GLM is a C++ math library meant to mirror the syntax of GLSL 
@@ -62,11 +92,21 @@ using glm::quat;
 
 ////// self defined stuff below
 #include "GameManager.h"
-
+struct Vector3 {
+	double* send(double x, double y, double z) {
+		double res[3];
+		res[0] = x;
+		res[1] = y;
+		res[2] = z;
+		return res;
+	}
+};
 using namespace std;
 using namespace glm;
 
 GameManager * gameManager;
+rpc::client client("localhost", 8080);
+/////testing struct//////////////////
 
 //======= move to GameManager ==========
 vec3 hand_track = vec3(1.0f);
@@ -736,9 +776,18 @@ protected:
 	}
 };
 
-
+#undef main
 // Execute our example class
 int main(int argc, char ** argv) {
+	std::cout << "Calling get_mandelbrot asynchronically" << std::endl;
+	
+	auto s = client.async_call("get_mandelbrot1", 1, 1, 1);
+	auto result_obj = client.call("get_data1");
+	auto res = result_obj.get().as<pixel_data>();
+	if (!res.empty()) {
+		auto v = res[0];
+		cout << "client2 should receive 2 from client2" << v.x << v.y << v.z << endl;
+	}
 	int result = -1;
 	try {
 		if (!OVR_SUCCESS(ovr_Initialize(nullptr))) {

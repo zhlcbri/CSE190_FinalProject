@@ -1,0 +1,3 @@
+C:/Users/kuliang/Downloads/OVRAvatarSDK/Samples/builf/CMakeFiles/Mirror.dir
+C:/Users/kuliang/Downloads/OVRAvatarSDK/Samples/builf/CMakeFiles/ALL_BUILD.dir
+C:/Users/kuliang/Downloads/OVRAvatarSDK/Samples/builf/CMakeFiles/ZERO_CHECK.dir

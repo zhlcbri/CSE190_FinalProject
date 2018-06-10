@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\kuliang\Downloads\OVRAvatarSDK\Samples\Mirror\Mirror.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\kuliang\Downloads\OVRAvatarSDK\Samples\Dependencies\glm\glm\detail\glm.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\kuliang\Downloads\OVRAvatarSDK\Samples\Dependencies\OVRPlatform\Windows\OVR_PlatformLoader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\kuliang\Downloads\OVRAvatarSDK\Samples\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\Users\kuliang\Downloads\OVRAvatarSDK\Samples\ReferenceShaders\AvatarVertexShader.glsl" />
+    <None Include="C:\Users\kuliang\Downloads\OVRAvatarSDK\Samples\ReferenceShaders\AvatarFragmentShader.glsl" />
+    <None Include="C:\Users\kuliang\Downloads\OVRAvatarSDK\Samples\ReferenceShaders\AvatarFragmentShaderPBS.glsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{1E4D6C91-6802-3550-978F-449A307226D7}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

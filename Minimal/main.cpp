@@ -93,6 +93,13 @@ float playbackTime = 0;
 std::chrono::steady_clock::time_point lastTime = std::chrono::steady_clock::now();
 vec3 not_my_head_pos;
 
+mat4 M_hand;
+mat4 M_not_my_hand;
+mat4 M_my_head;
+mat4 M_not_my_head;
+
+vec3 gogoPos;
+
 int flag_init = 0;
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -134,14 +141,7 @@ vec3 handPos[2];
 mat4 handRotation[2];
 quat handQuaternion[2]; // temp
 
-// button states
-bool button_X = false;
-bool button_Y = false;
-bool button_A = false;
-bool button_B = false;
-bool isPressed = false;
 
-bool doOnce = true; // temp
 
 bool checkFramebufferStatus(GLenum target = GL_FRAMEBUFFER) {
 	GLuint status = glCheckFramebufferStatus(target);
@@ -621,6 +621,9 @@ protected:
 	{
 		// reset booleans
 		button_X = false;
+		button_Y = false;
+		button_A = false;
+		button_B = false;
 
 		// Compute how much time has elapsed since the last frame
 		
@@ -634,6 +637,7 @@ protected:
 		ovrInputState inputState;
 		if (OVR_SUCCESS(ovr_GetInputState(_session, ovrControllerType_Touch, &inputState)))
 		{
+
 			// Button controls
 			if (!inputState.Buttons) {
 				isPressed = false;
@@ -643,6 +647,28 @@ protected:
 			if ((inputState.Buttons & ovrButton_X) && !isPressed) {
 				isPressed = true;
 				button_X = true;
+				cout << 'X' << endl;
+			}
+
+			// when 'Y' is pressed
+			if ((inputState.Buttons & ovrButton_Y) && !isPressed) {
+				isPressed = true;
+				button_Y = true;
+				cout << 'Y' << endl;
+			}
+
+			// when 'A' is pressed
+			if ((inputState.Buttons & ovrButton_A) && !isPressed) {
+				isPressed = true;
+				button_A = true;
+				cout << 'A' << endl;
+			}
+
+			// when 'B' is pressed
+			if ((inputState.Buttons & ovrButton_B) && !isPressed) {
+				isPressed = true;
+				button_B = true;
+				cout << 'B' << endl;
 			}
 		}
 
@@ -821,35 +847,33 @@ protected:
 
 		// gogo algorithm
 		vec3 handForward = getForwardVector(handQuaternion[0]);
-		vec3 gogoPos = gameManager->gogoHand(handPos[0], inverse(headPose)[3], -(handForward));
+		gogoPos = gameManager->gogoHand(handPos[0], inverse(headPose)[3], -(handForward));
 		/*vec3 not_my_hand = send_receive_hand_position(gogoPos);*/
 		pair<vec3, vec3> res = send_receive_hand_position(gogoPos, my_head_pos);
 		not_my_head_pos = res.second;
-		// =========== left hand ==============
+		//=========== left hand ==============
 		mat4 T_hand = translate(mat4(1.0f), gogoPos);
-		//////////////////supposed to be///////////////////////////
-		/*mat4 T_not_my_hand = translate(mat4(1.0f), not_my_hand);*/
-		///////////////////////////////////////////////////////////
-		/////////////testing///////////////////////////////////////
 		mat4 T_not_my_hand = translate(mat4(1.0f), vec3(res.first.x, res.first.y, res.first.z));
-
 		//mat4 T_hand = translate(mat4(1.0f), handPos[0]);
 		mat4 S_hand = scale(mat4(1.0f), vec3(0.005, 0.005, 0.005));
 		mat4 R_hand = handRotation[0];
-		mat4 M_hand = T_hand * R_hand * S_hand;
-		mat4 M_not_my_hand = T_not_my_hand * R_hand*S_hand;
-		mat4 M_my_head = translate(glm::mat4(1.0f), head);
-		mat4 M_not_my_head = translate(glm::mat4(1.0f), not_my_head_pos);
+		M_hand = T_hand * R_hand * S_hand;
+		M_not_my_hand = T_not_my_hand * R_hand*S_hand;
+
 		gameManager->renderHand(projection, inverse(headPose), M_hand);
 		gameManager->renderHand(projection, inverse(headPose), M_not_my_hand);
 
-		////////////redering head/////////////////
 		
+		//================= head =====================
+		M_my_head = translate(glm::mat4(1.0f), head);
+		M_not_my_head = translate(glm::mat4(1.0f), not_my_head_pos);
 		gameManager->renderCubes(projection, inverse(headPose), M_not_my_head);
-		/////////
+
+
 		//============== skybox ===============
 		mat4 M_skybox = scale(mat4(1.0f), vec3(325.0f, 325.0f, 325.0f));
 		gameManager->renderSkybox(projection, inverse(headPose), M_skybox);
+
 
 		// ============ cubes ==============
 		mat4 T_cubeX = translate(mat4(1.0f), cube_track);
@@ -857,15 +881,19 @@ protected:
 		mat4 R_cubeX = rotate(mat4(1.0f), angle_r / 180.0f*pi<float>(), vec3(0.0, 1.0, 0.0));
 		mat4 M_cubeX = T_cubeX * R_cubeX * S_cubeX;
 
+
 		//=========== particles =============
-		bool beatHit = (gameManager->colliding(vec3(M_hand[3]), vec3(M_cubeX[3]), 0.2f) && button_X);
+		//bool hit = (gameManager->colliding(vec3(M_hand[3]), vec3(M_cubeX[3]), 0.2f) && button_X);
+
+
+
 		if (cube_track.y < -4.0) {
 			cube_track.y = 4.0;
 			speed += 1.0;
 			num_instance++;
 			gameManager->calculate();
 		}
-		if (doOnce && !beatHit) {
+		if (doOnce && !gameManager->hit()) {
 			//gameManager->dropCubes(T_cubeX, S_cubeX, projection, inverse(headPose));
 			gameManager->rainCubes(projection, inverse(headPose));
 		}

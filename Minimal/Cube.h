@@ -111,6 +111,10 @@ public:
 		S = scaleMatrix;
 	}
 
+	mat4 getToWorld() {
+		return toWorld;
+	}
+
 	void spin() {
 		R = glm::rotate(mat4(1.0f), angle_r / 180.0f*pi<float>(), vec3(0.0, 1.0, 0.0));
 	}

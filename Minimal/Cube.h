@@ -111,6 +111,10 @@ public:
 		S = scaleMatrix;
 	}
 
+	mat4 getToWorld() {
+		return toWorld;
+	}
+
 	void spin() {
 		R = glm::rotate(mat4(1.0f), angle_r / 180.0f*pi<float>(), vec3(0.0, 1.0, 0.0));
 	}
@@ -209,7 +213,7 @@ public:
 		}
 		else {
 			glCullFace(GL_BACK); // otherwise cull back face
-		}		
+		}
 
 		shader.setInt("myTex", 0);
 		glActiveTexture(GL_TEXTURE0);
@@ -227,28 +231,28 @@ public:
 		glDepthFunc(GL_LESS); // set depth function back to default
 		glCullFace(GL_BACK); // set default cull backface 
 	};
-	
+
 	const GLfloat vertices[8][3] = {
 		//"Front" vertices
 		{ -1.0, -1.0,  1.0 },{ 1.0, -1.0,  1.0 },{ 1.0,  1.0,  1.0 },{ -1.0,  1.0,  1.0 },
 
 		//"Back" vertices
-	    { -1.0, -1.0, -1.0 },{ 1.0, -1.0, -1.0 },{ 1.0,  1.0, -1.0 },{ -1.0,  1.0, -1.0 }
+	{ -1.0, -1.0, -1.0 },{ 1.0, -1.0, -1.0 },{ 1.0,  1.0, -1.0 },{ -1.0,  1.0, -1.0 }
 	};
 
 	const GLuint indices[6][6] = {
 		// Front face
 		{ 0, 1, 2, 2, 3, 0 },
 		// Top face
-	    { 1, 5, 6, 6, 2, 1 },
-	    // Back face
-	    { 7, 6, 5, 5, 4, 7 },
-	    // Bottom face
-	    { 4, 0, 3, 3, 7, 4 },
-	    // Left face
-	    { 4, 5, 1, 1, 0, 4 },
-	    // Right face
-	    { 3, 2, 6, 6, 7, 3 }
+	{ 1, 5, 6, 6, 2, 1 },
+	// Back face
+	{ 7, 6, 5, 5, 4, 7 },
+	// Bottom face
+	{ 4, 0, 3, 3, 7, 4 },
+	// Left face
+	{ 4, 5, 1, 1, 0, 4 },
+	// Right face
+	{ 3, 2, 6, 6, 7, 3 }
 	};
 
 

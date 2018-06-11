@@ -16,18 +16,51 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 ************************************************************************************/
+#include <OVR_Avatar.h>
+
+#include <GL/glew.h>
+
+#include <SDL.h>
+#include <SDL_opengl.h>
+
+#include <OVR_CAPI.h>
+#include <OVR_CAPI_GL.h>
+#include <OVR_Platform.h>
+
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/transform.hpp>
+#include <glm/gtx/matrix_decompose.hpp>
+
+#include <malloc.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string>
+#include <map>
+#include <chrono>
 
 #include <iostream>
 #include <memory>
 #include <exception>
 #include <algorithm>
-
+#include <rpc/client.h>
+#include <rpc/rpc_error.h>
 #include <Windows.h>
+#include "mandelbrot.h"
+#include "rpc/client.h"
+#include "Vector3d.hpp"
+
+
 
 #define __STDC_FORMAT_MACROS 1
 
 #define FAIL(X) throw std::runtime_error(X)
+#define MIRROR_SAMPLE_APP_ID "958062084316416"
+#define MIRROR_WINDOW_WIDTH 800
+#define MIRROR_WINDOW_HEIGHT 600
 
+// Disable MIRROR_ALLOW_OVR to force 2D rendering
+#define MIRROR_ALLOW_OVR true
 ///////////////////////////////////////////////////////////////////////////////
 //
 // GLM is a C++ math library meant to mirror the syntax of GLSL 
@@ -53,6 +86,19 @@ using glm::vec3;
 using glm::vec4;
 using glm::quat;
 
+//ovrAvatarPacket* playbackPacket = nullptr;
+//float playbackTime = 0;
+//std::chrono::steady_clock::time_point lastTime = std::chrono::steady_clock::now();
+vec3 not_my_head_pos;
+
+mat4 M_hand;
+mat4 M_not_my_hand;
+mat4 M_my_head;
+mat4 M_not_my_head;
+
+vec3 gogoPos;
+
+int flag_init = 0;
 ///////////////////////////////////////////////////////////////////////////////
 //
 // GLEW gives cross platform access to OpenGL 3.x+ functionality.  
@@ -62,11 +108,29 @@ using glm::quat;
 
 ////// self defined stuff below
 #include "GameManager.h"
-
+struct Vector3 {
+	double* send(double x, double y, double z) {
+		double res[3];
+		res[0] = x;
+		res[1] = y;
+		res[2] = z;
+		return res;
+	}
+};
 using namespace std;
 using namespace glm;
 
 GameManager * gameManager;
+string const addr = "128.54.70.72";
+rpc::client client(addr, 8080);
+glm::vec3 left_eye_track = glm::vec3(0, 0, 0);
+
+///////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////
+
+/////testing struct//////////////////
 
 //======= move to GameManager ==========
 vec3 hand_track = vec3(1.0f);
@@ -76,14 +140,6 @@ vec3 handPos[2];
 mat4 handRotation[2];
 quat handQuaternion[2]; // temp
 
-// button states
-bool button_X = false;
-bool button_Y = false;
-bool button_A = false;
-bool button_B = false;
-bool isPressed = false;
-
-bool doOnce = true; // temp
 
 bool checkFramebufferStatus(GLenum target = GL_FRAMEBUFFER) {
 	GLuint status = glCheckFramebufferStatus(target);
@@ -268,6 +324,7 @@ protected:
 		}
 		glGetError();
 
+
 		if (GLEW_KHR_debug) {
 			GLint v;
 			glGetIntegerv(GL_CONTEXT_FLAGS, &v);
@@ -432,6 +489,7 @@ public:
 			FAIL("Unable to create HMD session");
 		}
 
+
 		_hmdDesc = ovr_GetHmdDesc(_session);
 	}
 
@@ -453,6 +511,8 @@ private:
 	ovrMirrorTexture _mirrorTexture;
 
 	ovrEyeRenderDesc _eyeRenderDescs[2];
+
+	//double sensorSampleTime = 0.0;
 
 	mat4 _eyeProjections[2];
 
@@ -499,7 +559,7 @@ protected:
 
 	void initGl() override {
 		GlfwApp::initGl();
-		
+
 		// Disable the v-sync for buffer swap
 		glfwSwapInterval(0);
 
@@ -559,10 +619,14 @@ protected:
 	{
 		// reset booleans
 		button_X = false;
+		button_Y = false;
+		button_A = false;
+		button_B = false;
 
 		ovrInputState inputState;
 		if (OVR_SUCCESS(ovr_GetInputState(_session, ovrControllerType_Touch, &inputState)))
 		{
+
 			// Button controls
 			if (!inputState.Buttons) {
 				isPressed = false;
@@ -572,6 +636,28 @@ protected:
 			if ((inputState.Buttons & ovrButton_X) && !isPressed) {
 				isPressed = true;
 				button_X = true;
+				cout << 'X' << endl;
+			}
+
+			// when 'Y' is pressed
+			if ((inputState.Buttons & ovrButton_Y) && !isPressed) {
+				isPressed = true;
+				button_Y = true;
+				cout << 'Y' << endl;
+			}
+
+			// when 'A' is pressed
+			if ((inputState.Buttons & ovrButton_A) && !isPressed) {
+				isPressed = true;
+				button_A = true;
+				cout << 'A' << endl;
+			}
+
+			// when 'B' is pressed
+			if ((inputState.Buttons & ovrButton_B) && !isPressed) {
+				isPressed = true;
+				button_B = true;
+				cout << 'B' << endl;
 			}
 		}
 	}
@@ -610,7 +696,7 @@ protected:
 		// make hand position and orientation global
 		handPos[0] = ovr::toGlm(handPosition[0]);
 		handPos[1] = ovr::toGlm(handPosition[1]);
-		
+
 		handRotation[0] = toMat4(ovr::toGlm(handPoses[0].Orientation));
 		handRotation[1] = toMat4(ovr::toGlm(handPoses[1].Orientation));
 
@@ -619,6 +705,14 @@ protected:
 		handQuaternion[1] = quat_cast(handRotation[1]);
 
 		ovrPosef eyePoses[2];
+		ovrVector3f eyePosition = eyePoses[0].Position;
+
+		left_eye_track = ovr::toGlm(eyePosition);
+		if (flag_init == 0) {
+			flag_init = 1;
+			not_my_head_pos = left_eye_track;
+
+		}
 		ovr_GetEyePoses(_session, frame, true, _viewScaleDesc.HmdToEyePose, eyePoses, &_sceneLayer.SensorSampleTime);
 
 		int curIndex;
@@ -627,12 +721,19 @@ protected:
 		ovr_GetTextureSwapChainBufferGL(_session, _eyeTexture, curIndex, &curTexId);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _fbo);
 		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, curTexId, 0);
+
+		//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, eyeDepthBuffers[eye], 0); //
+
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 		ovr::for_each_eye([&](ovrEyeType eye) {
+
 			const auto& vp = _sceneLayer.Viewport[eye];
 			glViewport(vp.Pos.x, vp.Pos.y, vp.Size.w, vp.Size.h);
 			_sceneLayer.RenderPose[eye] = eyePoses[eye];
 			renderScene(_eyeProjections[eye], ovr::toGlm(eyePoses[eye]));
+
+
 		});
 		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
@@ -642,6 +743,7 @@ protected:
 
 		GLuint mirrorTextureId;
 		ovr_GetMirrorTextureBufferGL(_session, _mirrorTexture, &mirrorTextureId);
+
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, _mirrorFbo);
 		glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mirrorTextureId, 0);
 		glBlitFramebuffer(0, 0, _mirrorSize.x, _mirrorSize.y, 0, _mirrorSize.y, _mirrorSize.x, 0, GL_COLOR_BUFFER_BIT, GL_NEAREST);
@@ -664,10 +766,18 @@ protected:
 		RiftApp::initGl();
 		glClearColor(0.2f, 0.2f, 0.2f, 0.0f);
 		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		ovr_RecenterTrackingOrigin(_session);
-		
+
+
+
 		gameManager = new GameManager();
 		gameManager->playSound();
+		gameManager->calculate();
+
 	}
 
 	void shutdownGl() override {
@@ -692,27 +802,65 @@ protected:
 
 		return vec3(z2x + y2w, z2y - x2w, 1.0f - (x2x + y2y));
 	}
+	pair<vec3, vec3> send_receive_hand_position(glm::vec3 head, glm::vec3 hand) {
+		pixel_data res;
+		try {
+			string e = "wrong";
+			std::cout << "Calling get_mandelbrot asynchronically" << std::endl;
+			auto result_obj = client.call("get_mandelbrot2", head.x, head.y, head.z, hand.x, hand.y, hand.z);
+			res = result_obj.as<pixel_data>();
+			if (res.size() != 2) {
+				throw e;
+			}
+
+			cout << "client2 should receive odd " << res[0].x << res[0].y << res[0].z << res[1].x << res[1].y << res[1].z << endl;
+		}
+		catch (string e) {
+			std::cout << std::endl << e << std::endl;
+		}
+
+		return make_pair(glm::vec3(res[0].x, res[0].y, res[0].z), glm::vec3(res[1].x, res[1].y, res[1].z));
+	}
 
 	void renderScene(const glm::mat4 & projection, const glm::mat4 & headPose) override {
+		//gameManager->calculate();
+		//////for head pos////////////////
+		vec3 head = (vec3)inverse(headPose)[3];
+		vec3 my_head_pos = vec3(head.x, head.y, head.z - 2.0);
+		/*not_my_head_pos = send_receive_hand_position(my_head_pos);*/
 		// update cube spinning angle
 		angle_r += deg;
 		if (angle_r > 360.0f || angle_r < -360.0f) angle_r = 0.0f;
 
 		// gogo algorithm
 		vec3 handForward = getForwardVector(handQuaternion[0]);
-		vec3 gogoPos = gameManager->gogoHand(handPos[0], inverse(headPose)[3], -(handForward));
-
-		// =========== left hand ==============
+		gogoPos = gameManager->gogoHand(handPos[0], inverse(headPose)[3], -(handForward));
+		/*vec3 not_my_hand = send_receive_hand_position(gogoPos);*/
+		pair<vec3, vec3> res = send_receive_hand_position(gogoPos, my_head_pos);
+		not_my_head_pos = res.second;
+		//=========== left hand ==============
 		mat4 T_hand = translate(mat4(1.0f), gogoPos);
+		mat4 T_not_my_hand = translate(mat4(1.0f), vec3(res.first.x, res.first.y, res.first.z));
 		//mat4 T_hand = translate(mat4(1.0f), handPos[0]);
 		mat4 S_hand = scale(mat4(1.0f), vec3(0.005, 0.005, 0.005));
 		mat4 R_hand = handRotation[0];
-		mat4 M_hand = T_hand * R_hand * S_hand;
+		M_hand = T_hand * R_hand * S_hand;
+		M_not_my_hand = T_not_my_hand * R_hand*S_hand;
+
 		gameManager->renderHand(projection, inverse(headPose), M_hand);
+		gameManager->renderHand(projection, inverse(headPose), M_not_my_hand);
+
+
+		//================= head =====================
+		M_my_head = translate(glm::mat4(1.0f), head);
+		M_not_my_head = translate(glm::mat4(1.0f), not_my_head_pos);
+		gameManager->renderCubes(projection, inverse(headPose), M_not_my_head);
+
 
 		//============== skybox ===============
-		mat4 M_skybox = scale(mat4(1.0f), vec3(325.0f, 325.0f, 325.0f));	
+		mat4 M_skybox = scale(mat4(1.0f), vec3(325.0f, 325.0f, 325.0f));
 		gameManager->renderSkybox(projection, inverse(headPose), M_skybox);
+
 
 		// ============ cubes ==============
 		mat4 T_cubeX = translate(mat4(1.0f), cube_track);
@@ -720,25 +868,55 @@ protected:
 		mat4 R_cubeX = rotate(mat4(1.0f), angle_r / 180.0f*pi<float>(), vec3(0.0, 1.0, 0.0));
 		mat4 M_cubeX = T_cubeX * R_cubeX * S_cubeX;
 
-		//=========== particles =============
-		bool beatHit = (gameManager->colliding(vec3(M_hand[3]), vec3(M_cubeX[3]), 0.2f) && button_X);
 
-		if (doOnce && !beatHit) {
-			gameManager->dropCubes(T_cubeX, S_cubeX, projection, inverse(headPose));
-			//gameManager->rainCubes(projection, inverse(headPose));
+		//=========== particles =============
+		//bool hit = (gameManager->colliding(vec3(M_hand[3]), vec3(M_cubeX[3]), 0.2f) && button_X);
+
+
+
+		if (cube_track.y < -4.0) {
+			cube_track.y = 4.0;
+			speed += 1.0;
+			num_instance++;
+			gameManager->calculate();
+		}
+		if (doOnce && !gameManager->hit()) {
+			//gameManager->dropCubes(T_cubeX, S_cubeX, projection, inverse(headPose));
+			gameManager->rainCubes(projection, inverse(headPose));
 		}
 		else {
 			doOnce = false;
 			gameManager->renderParticles(projection, inverse(headPose), M_cubeX);
 		}
 		hand_track = handPos[0];
-		cube_track.y -= 0.001;
+		//cube_track.y -= 0.001;
 	}
 };
 
-
+#undef main
 // Execute our example class
 int main(int argc, char ** argv) {
+	//int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
+	/*for (int i = 0; i < 100000; i++) {
+	try {
+	string e = "erong";
+	std::cout << "Calling get_mandelbrot asynchronically" << std::endl;
+	auto result_obj = client.call("get_mandelbrot1", 2 * i, 2 * i, 2 * i);
+	auto res = result_obj.as<pixel>();
+	if (res.x == 0 && res.y == 0 && res.z == 0) {
+	throw e;
+	}
+
+	cout << "client1 should receive odd " << res.x << res.y << res.z << endl;
+	}
+	catch (string e) {
+	std::cout << std::endl << e << std::endl;
+	}
+	}*/
+
+
+
+
 	int result = -1;
 	try {
 		if (!OVR_SUCCESS(ovr_Initialize(nullptr))) {
@@ -751,5 +929,8 @@ int main(int argc, char ** argv) {
 		std::cerr << error.what() << std::endl;
 	}
 	ovr_Shutdown();
+
+
+
 	return result;
 }

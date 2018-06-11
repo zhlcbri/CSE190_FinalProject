@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\kuliang\Downloads\OVRAvatarSDK\Samples\builf\CMakeFiles\068233828bba3c7c6c68559ff337b56e\generate.stamp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{64AD4EF7-B0C3-377B-A9CF-95D9CFC65841}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

@@ -146,5 +146,11 @@
     <ClInclude Include="..\Gist-master\libs\kiss_fft130\kissfft.hh">
       <Filter>Source Files\gist</Filter>
     </ClInclude>
+    <ClInclude Include="mandelbrot.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Vector3d.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

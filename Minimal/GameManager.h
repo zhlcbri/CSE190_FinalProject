@@ -61,6 +61,24 @@ public:
 	Shader shader_particle = Shader(PARTICLE_VERT, PARTICLE_FRAG);
 	Shader shader_score = Shader(SCORE_VERT, SCORE_FRAG);
 
+	vector<string> faces_cry = {
+		"CubeTex/emoji_cry.ppm",
+		"CubeTex/emoji_cry.ppm",
+		"CubeTex/emoji_cry.ppm",
+		"CubeTex/emoji_cry.ppm",
+		"CubeTex/emoji_cry.ppm",
+		"CubeTex/emoji_cry.ppm",
+	};
+
+	vector<string> faces_wink = {
+		"CubeTex/emoji_wink.ppm",
+		"CubeTex/emoji_wink.ppm",
+		"CubeTex/emoji_wink.ppm",
+		"CubeTex/emoji_wink.ppm",
+		"CubeTex/emoji_wink.ppm",
+		"CubeTex/emoji_wink.ppm",
+	};
+
 	vector<string> faces_skybox = {
 		"Skybox/front.ppm",
 		"Skybox/back.ppm",
@@ -116,6 +134,9 @@ public:
 	Cube * cube_B;
 	Cube * cube_curr;
 
+	Cube * head_cry;
+	Cube * head_wink;
+
 	GameManager() {
 		hand = new Model(PATH_HAND, false);
 		music = new Music(SOUND_1);
@@ -126,9 +147,12 @@ public:
 		cube_X = new Cube(faces_X, false, "X");
 		cube_Y = new Cube(faces_Y, false, "Y");
 		cube_A = new Cube(faces_A, false, "A");
-		cube_B = new Cube(faces_X, false, "B");
+		cube_B = new Cube(faces_B, false, "B");
 
 		cube_curr = new Cube(faces_B, false, "B");
+
+		head_cry = new Cube(faces_cry, false);
+		head_wink = new Cube(faces_wink, false);
 
 		my_score = new Score();
 	}
@@ -149,6 +173,16 @@ public:
 
 	void update() {
 		my_score->update();
+	}
+
+	//===================== head ======================
+	void renderHead(mat4 projection, mat4 view, mat4 model, bool flag = false) {
+		if (flag) {
+			head_cry->draw(shader_cube, projection, view, model);
+		}
+		else {
+			head_wink->draw(shader_cube, projection, view, model);
+		}
 	}
 
 	//===================== calculate controller position ===================

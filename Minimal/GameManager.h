@@ -27,8 +27,10 @@ const char * CUBE_FRAG = "shader_cube.frag";
 const char * PARTICLE_VERT = "shader_particle.vert";
 const char * PARTICLE_FRAG = "shader_particle.frag";
 
+int num_instance = 4;
 vec3 cube_track = vec3(0, 2.0, -0.5);
-
+vector<vec3> cube_pos;
+double speed = 1.0;
 mat4 fall = glm::translate(glm::mat4(1.0f), vec3(0.0f, -0.1f, 0.0f));
 class GameManager
 {
@@ -158,21 +160,34 @@ public:
 		//using binary search if this is not enough
 		return true;
 	}
-
-	void rainCubes(mat4 projection, mat4 view) {	
-		mat4 S = scale(mat4(1.0f), vec3(0.1f, 0.1f, 0.1f));
-	
-		// randomize T matrix
-		for (int i = 0; i < 10; i++) {
-			if (i < 5)
-				cube_track.x = -i * 0.4;
-			else {
-				cube_track.x = i * 0.4;
+	void calculate() {
+		double y = cube_track.y;
+		cout << y << endl;
+		srand(time(0));
+		int num = rand() % 25;
+		for (double i = 1; i <= num_instance; i++) {
+			if (i < 3) {
+				cube_track = vec3(-0.1*num + i, y, -0.1*i*num);
 			}
-			mat4 T = translate(mat4(1.0f), cube_track);
-			dropCubes(T, S, projection, view);
-			
+			else {
+				cube_track = vec3(0.1*num + i, y, -0.1*(i-1.6)*num);
+			}
+
+			cube_pos.push_back(cube_track);
+			cout << cube_pos.size() << endl;
 		}
+	}
+	void rainCubes(mat4 projection, mat4 view) {
+		
+		mat4 S = scale(mat4(1.0f), vec3(0.1f, 0.1f, 0.1f));
+		cout << cube_pos.size() << endl;
+		for (int i = 0; i < num_instance; i++) {
+			vec3 track = vec3(cube_pos[i].x, cube_track.y, cube_pos[i].z);
+			mat4 T = translate(mat4(1.0f), track);
+			dropCubes(T, S, projection, view);
+		}
+		
+		cube_track.y-=speed*0.002;
 	}
 };
 

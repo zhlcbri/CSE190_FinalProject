@@ -49,6 +49,9 @@ limitations under the License.
 #include "mandelbrot.h"
 #include "rpc/client.h"
 #include "Vector3d.hpp"
+
+#include <../OVRAvatarSDK/Samples/Mirror/Mirror.cpp>
+
 #define __STDC_FORMAT_MACROS 1
 
 #define FAIL(X) throw std::runtime_error(X)
@@ -83,6 +86,12 @@ using glm::vec3;
 using glm::vec4;
 using glm::quat;
 
+bool renderJoints = false;
+
+ovrAvatarPacket* playbackPacket = nullptr;
+float playbackTime = 0;
+std::chrono::steady_clock::time_point lastTime = std::chrono::steady_clock::now();
+
 ///////////////////////////////////////////////////////////////////////////////
 //
 // GLEW gives cross platform access to OpenGL 3.x+ functionality.  
@@ -107,6 +116,12 @@ using namespace glm;
 GameManager * gameManager;
 rpc::client client("localhost", 8080);
 glm::vec3 left_eye_track = glm::vec3(0, 0, 0);
+
+///////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////
+
 /////testing struct//////////////////
 
 //======= move to GameManager ==========
@@ -309,6 +324,7 @@ protected:
 		}
 		glGetError();
 
+		
 		if (GLEW_KHR_debug) {
 			GLint v;
 			glGetIntegerv(GL_CONTEXT_FLAGS, &v);
@@ -473,6 +489,7 @@ public:
 			FAIL("Unable to create HMD session");
 		}
 
+
 		_hmdDesc = ovr_GetHmdDesc(_session);
 	}
 
@@ -493,7 +510,16 @@ private:
 	GLuint _mirrorFbo{ 0 };
 	ovrMirrorTexture _mirrorTexture;
 
+	//=========================
+	ovrTextureSwapChain eyeSwapChains[2];
+	GLuint eyeFrameBuffers[2];
+	GLuint eyeDepthBuffers[2];
+	ovrSizei eyeSizes[2];
+	//=========================
+
 	ovrEyeRenderDesc _eyeRenderDescs[2];
+
+	//double sensorSampleTime = 0.0;
 
 	mat4 _eyeProjections[2];
 
@@ -541,6 +567,25 @@ protected:
 	void initGl() override {
 		GlfwApp::initGl();
 		
+		//============ init() ===============
+		//...
+		// Attempt to initialize the Oculus SDK
+		//ovrSession ovr = MIRROR_ALLOW_OVR ? _initOVR() : 0;
+		//if (!ovr)
+		//{
+		//	printf("OVR not initialized - rendering to 2D viewport...\r\n");
+		//}
+
+		//// Initialize SDL
+		//if (SDL_Init(SDL_INIT_VIDEO) != 0)
+		//{
+		//	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Mirror startup error", "Couldn't start SDL.", NULL);
+		//	_destroyOVR(ovr);
+		//	//return 1;
+		//	FAIL("Mirror startup error. Couldn't start SDL.");
+		//}
+		//======================================
+
 		// Disable the v-sync for buffer swap
 		glfwSwapInterval(0);
 
@@ -601,6 +646,15 @@ protected:
 		// reset booleans
 		button_X = false;
 
+		// Compute how much time has elapsed since the last frame
+		
+
+		std::chrono::steady_clock::time_point currentTime = std::chrono::steady_clock::now();
+		std::chrono::duration<float> deltaTime = currentTime - lastTime;
+		float deltaSeconds = deltaTime.count();
+		lastTime = currentTime;
+		_elapsedSeconds += deltaSeconds;
+
 		ovrInputState inputState;
 		if (OVR_SUCCESS(ovr_GetInputState(_session, ovrControllerType_Touch, &inputState)))
 		{
@@ -614,7 +668,44 @@ protected:
 				isPressed = true;
 				button_X = true;
 			}
+
+			// If the avatar is initialized, update it
+			if (_avatar)
+			{
+				ovrInputState touchState;
+				ovr_GetInputState(/*ovr*/_session, ovrControllerType_Active, &touchState);
+				ovrTrackingState trackingState = ovr_GetTrackingState(/*ovr*/_session, 0.0, false);
+
+				glm::vec3 hmdP = _glmFromOvrVector(trackingState.HeadPose.ThePose.Position);
+				glm::quat hmdQ = _glmFromOvrQuat(trackingState.HeadPose.ThePose.Orientation);
+				glm::vec3 leftP = _glmFromOvrVector(trackingState.HandPoses[ovrHand_Left].ThePose.Position);
+				glm::quat leftQ = _glmFromOvrQuat(trackingState.HandPoses[ovrHand_Left].ThePose.Orientation);
+				glm::vec3 rightP = _glmFromOvrVector(trackingState.HandPoses[ovrHand_Right].ThePose.Position);
+				glm::quat rightQ = _glmFromOvrQuat(trackingState.HandPoses[ovrHand_Right].ThePose.Orientation);
+
+				ovrAvatarTransform hmd;
+				_ovrAvatarTransformFromGlm(hmdP, hmdQ, glm::vec3(1.0f), &hmd);
+
+				ovrAvatarTransform left;
+				_ovrAvatarTransformFromGlm(leftP, leftQ, glm::vec3(1.0f), &left);
+
+				ovrAvatarTransform right;
+				_ovrAvatarTransformFromGlm(rightP, rightQ, glm::vec3(1.0f), &right);
+
+				ovrAvatarHandInputState inputStateLeft;
+				_ovrAvatarHandInputStateFromOvr(left, touchState, ovrHand_Left, &inputStateLeft);
+
+				ovrAvatarHandInputState inputStateRight;
+				_ovrAvatarHandInputStateFromOvr(right, touchState, ovrHand_Right, &inputStateRight);
+
+				_updateAvatar(_avatar, deltaSeconds, hmd, inputStateLeft, inputStateRight, /*mic*/nullptr, playbackPacket, &playbackTime);
+			}
+			playbackPacket = nullptr;
+			playbackTime = 0;
+			lastTime = std::chrono::steady_clock::now();
 		}
+
+
 	}
 
 	void onKey(int key, int scancode, int action, int mods) override {
@@ -670,12 +761,69 @@ protected:
 		ovr_GetTextureSwapChainBufferGL(_session, _eyeTexture, curIndex, &curTexId);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _fbo);
 		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, curTexId, 0);
+
+		//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, eyeDepthBuffers[eye], 0); //
+
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 		ovr::for_each_eye([&](ovrEyeType eye) {
+			//====================================
+
+			ovrVector3f eyePosition = eyePoses[eye].Position;
+			ovrQuatf eyeOrientation = eyePoses[eye].Orientation;
+			glm::quat glmOrientation = _glmFromOvrQuat(eyeOrientation);
+			glm::vec3 eyeWorld = _glmFromOvrVector(eyePosition);
+			glm::vec3 eyeForward = glmOrientation * glm::vec3(0, 0, -1);
+			glm::vec3 eyeUp = glmOrientation * glm::vec3(0, 1, 0);
+			glm::mat4 view = glm::lookAt(eyeWorld, eyeWorld + eyeForward, eyeUp);
+			ovrMatrix4f ovrProjection = ovrMatrix4f_Projection(_hmdDesc.DefaultEyeFov[eye], 0.01f, 1000.0f, ovrProjection_None);
+			glm::mat4 proj(
+				ovrProjection.M[0][0], ovrProjection.M[1][0], ovrProjection.M[2][0], ovrProjection.M[3][0],
+				ovrProjection.M[0][1], ovrProjection.M[1][1], ovrProjection.M[2][1], ovrProjection.M[3][1],
+				ovrProjection.M[0][2], ovrProjection.M[1][2], ovrProjection.M[2][2], ovrProjection.M[3][2],
+				ovrProjection.M[0][3], ovrProjection.M[1][3], ovrProjection.M[2][3], ovrProjection.M[3][3]
+			);
+
+			// If we have the avatar and have finished loading assets, render it
+			if (_avatar && !_loadingAssets && !_waitingOnCombinedMesh)
+			{
+				_renderAvatar(_avatar, ovrAvatarVisibilityFlag_FirstPerson, view, proj, eyeWorld, renderJoints);
+
+				glm::vec4 reflectionPlane = glm::vec4(0.0, 0.0, -1.0, 0.0);
+				glm::mat4 reflection = _computeReflectionMatrix(reflectionPlane);
+
+				glFrontFace(GL_CW);
+				_renderAvatar(_avatar, ovrAvatarVisibilityFlag_ThirdPerson, view * reflection, proj, glm::vec3(reflection * glm::vec4(eyeWorld, 1.0f)), renderJoints);
+				glFrontFace(GL_CCW);
+			}
+			// Unbind the eye buffer
+			/*glBindFramebuffer(GL_FRAMEBUFFER, eyeFrameBuffers[eye]);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, 0, 0);*/
+
+			// Commit changes to the textures so they get picked up frame
+			//ovr_CommitTextureSwapChain(_session, eyeSwapChains[eye]);//
+
+			//====================================
 			const auto& vp = _sceneLayer.Viewport[eye];
 			glViewport(vp.Pos.x, vp.Pos.y, vp.Size.w, vp.Size.h);
 			_sceneLayer.RenderPose[eye] = eyePoses[eye];
 			renderScene(_eyeProjections[eye], ovr::toGlm(eyePoses[eye]));
+
+			// Prepare the layers
+            ovrLayerEyeFov layerDesc;
+            memset(&layerDesc, 0, sizeof(layerDesc));
+            layerDesc.Header.Type = ovrLayerType_EyeFov;
+            layerDesc.Header.Flags = ovrLayerFlag_TextureOriginAtBottomLeft;   // Because OpenGL.
+            for (int eye = 0; eye < 2; ++eye)
+            {
+                layerDesc.ColorTexture[eye] = eyeSwapChains[eye];
+                layerDesc.Viewport[eye].Size = eyeSizes[eye];
+                layerDesc.Fov[eye] = _hmdDesc.DefaultEyeFov[eye];
+                layerDesc.RenderPose[eye] = eyePoses[eye];
+                layerDesc.SensorSampleTime = _sceneLayer.SensorSampleTime;
+            }
+
 		});
 		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
@@ -685,6 +833,7 @@ protected:
 
 		GLuint mirrorTextureId;
 		ovr_GetMirrorTextureBufferGL(_session, _mirrorTexture, &mirrorTextureId);
+
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, _mirrorFbo);
 		glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mirrorTextureId, 0);
 		glBlitFramebuffer(0, 0, _mirrorSize.x, _mirrorSize.y, 0, _mirrorSize.y, _mirrorSize.x, 0, GL_COLOR_BUFFER_BIT, GL_NEAREST);
@@ -707,10 +856,17 @@ protected:
 		RiftApp::initGl();
 		glClearColor(0.2f, 0.2f, 0.2f, 0.0f);
 		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		ovr_RecenterTrackingOrigin(_session);
 		
+		
+
 		gameManager = new GameManager();
 		gameManager->playSound();
+		gameManager->calculate();
 	}
 
 	void shutdownGl() override {
@@ -755,9 +911,10 @@ protected:
 		return glm::vec3(res.x, res.y, res.z);
 	}
 	void renderScene(const glm::mat4 & projection, const glm::mat4 & headPose) override {
+		//gameManager->calculate();
 		//////for head pos////////////////
 		vec3 head = (vec3)inverse(headPose)[3];
-		vec3 not_my_head = send_receive_position(left_eye_track);
+		vec3 not_my_head = send_receive_position(head);
 		// update cube spinning angle
 		angle_r += deg;
 		if (angle_r > 360.0f || angle_r < -360.0f) angle_r = 0.0f;
@@ -781,8 +938,8 @@ protected:
 		mat4 M_not_my_hand = T_not_my_hand * R_hand*S_hand;
 		mat4 M_my_head = translate(glm::mat4(1.0f), head);
 		mat4 M_not_my_head = translate(glm::mat4(1.0f), not_my_head);
-		/*gameManager->renderHand(projection, inverse(headPose), M_hand);
-		gameManager->renderHand(projection, inverse(headPose), M_not_my_hand);*/
+		gameManager->renderHand(projection, inverse(headPose), M_hand);
+		//gameManager->renderHand(projection, inverse(headPose), M_not_my_hand);
 
 		////////////redering head/////////////////
 		
@@ -800,23 +957,29 @@ protected:
 
 		//=========== particles =============
 		bool beatHit = (gameManager->colliding(vec3(M_hand[3]), vec3(M_cubeX[3]), 0.2f) && button_X);
-
+		if (cube_track.y < -4.0) {
+			cube_track.y = 4.0;
+			speed += 1.0;
+			num_instance++;
+			gameManager->calculate();
+		}
 		if (doOnce && !beatHit) {
-			gameManager->dropCubes(T_cubeX, S_cubeX, projection, inverse(headPose));
-			//gameManager->rainCubes(projection, inverse(headPose));
+			//gameManager->dropCubes(T_cubeX, S_cubeX, projection, inverse(headPose));
+			gameManager->rainCubes(projection, inverse(headPose));
 		}
 		else {
 			doOnce = false;
 			gameManager->renderParticles(projection, inverse(headPose), M_cubeX);
 		}
 		hand_track = handPos[0];
-		cube_track.y -= 0.001;
+		//cube_track.y -= 0.001;
 	}
 };
 
 #undef main
 // Execute our example class
 int main(int argc, char ** argv) {
+//int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
 	/*for (int i = 0; i < 100000; i++) {
 		try {
 			string e = "erong";
@@ -833,6 +996,10 @@ int main(int argc, char ** argv) {
 			std::cout << std::endl << e << std::endl;
 		}
 	}*/
+
+	
+
+
 	int result = -1;
 	try {
 		if (!OVR_SUCCESS(ovr_Initialize(nullptr))) {
@@ -845,5 +1012,18 @@ int main(int argc, char ** argv) {
 		std::cerr << error.what() << std::endl;
 	}
 	ovr_Shutdown();
+
+	//===================
+
+	printf("Shutting down...\r\n");
+	if (_avatar)
+	{
+		ovrAvatar_Destroy(_avatar);
+	}
+	ovrAvatar_Shutdown();
+	//SDL_Quit();
+
+	//===================
+
 	return result;
 }

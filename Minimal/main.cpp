@@ -638,30 +638,33 @@ protected:
 			if ((inputState.Buttons & ovrButton_X) && !isPressed) {
 				isPressed = true;
 				button_X = true;
-				cout << 'X' << endl;
+				//cout << 'X' << endl;
 			}
 
 			// when 'Y' is pressed
 			if ((inputState.Buttons & ovrButton_Y) && !isPressed) {
 				isPressed = true;
 				button_Y = true;
-				cout << 'Y' << endl;
+				//cout << 'Y' << endl;
 			}
 
 			// when 'A' is pressed
 			if ((inputState.Buttons & ovrButton_A) && !isPressed) {
 				isPressed = true;
 				button_A = true;
-				cout << 'A' << endl;
+				//cout << 'A' << endl;
 			}
 
 			// when 'B' is pressed
 			if ((inputState.Buttons & ovrButton_B) && !isPressed) {
 				isPressed = true;
 				button_B = true;
-				cout << 'B' << endl;
+				//cout << 'B' << endl;
 			}
 		}
+
+		// temp
+		if (button_X) hit = true;
 
 		gameManager->update();
 	}
@@ -810,14 +813,14 @@ protected:
 		pixel_data res;
 		try {
 			string e = "wrong";
-			std::cout << "Calling get_mandelbrot asynchronically" << std::endl;
+			//std::cout << "Calling get_mandelbrot asynchronically" << std::endl;
 			auto result_obj = client.call("get_mandelbrot2", head.x, head.y, head.z, hand.x, hand.y, hand.z);
 			res = result_obj.as<pixel_data>();
 			if (res.size() != 2) {
 				throw e;
 			}
 
-			cout << "client2 should receive odd " << res[0].x << res[0].y << res[0].z << res[1].x << res[1].y << res[1].z << endl;
+			//cout << "client2 should receive odd " << res[0].x << res[0].y << res[0].z << res[1].x << res[1].y << res[1].z << endl;
 		}
 		catch (string e) {
 			std::cout << std::endl << e << std::endl;
@@ -896,32 +899,16 @@ protected:
 		}
 		hand_track = handPos[0];
 		//cube_track.y -= 0.001;
+
+
+		//============== score ===============
+		gameManager->renderScore(projection, inverse(headPose));
 	}
 };
 
 #undef main
 // Execute our example class
 int main(int argc, char ** argv) {
-	//int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
-	/*for (int i = 0; i < 100000; i++) {
-	try {
-	string e = "wrong";
-	std::cout << "Calling get_mandelbrot asynchronically" << std::endl;
-	auto result_obj = client.call("get_mandelbrot1", 2 * i, 2 * i, 2 * i);
-	auto res = result_obj.as<pixel>();
-	if (res.x == 0 && res.y == 0 && res.z == 0) {
-	throw e;
-	}
-
-	cout << "client1 should receive odd " << res.x << res.y << res.z << endl;
-	}
-	catch (string e) {
-	std::cout << std::endl << e << std::endl;
-	}
-	}*/
-
-
-
 
 	int result = -1;
 	try {

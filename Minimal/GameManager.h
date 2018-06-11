@@ -46,7 +46,6 @@ bool button_B = false;
 bool isPressed = false;
 
 bool doOnce = true; // temp
-bool hit = false;
 
 class GameManager
 {
@@ -149,14 +148,10 @@ public:
 	}
 
 	void update() {
-
-		if (hit) {
-			my_score->increment(1);
-			cout << "scoreooooooooooooooooooooo: " << to_string(my_score->getNum()) << endl;
-		}
-
+		my_score->update();
 	}
 
+	//===================== calculate controller position ===================
 	vec3 gogoHand(vec3 handPos, vec3 torsoPos, vec3 handForward) {
 		float threshold = 0.50f; // D
 		float coeff = 7.5f; // k
@@ -170,6 +165,7 @@ public:
 		return res;
 	}
 
+	//===================== controller ========================
 	void renderHand(mat4 projection, mat4 view, mat4 model) {
 		shader_model.use();
 		shader_model.setMat4("projection", projection);
@@ -178,10 +174,12 @@ public:
 		hand->Draw(shader_model);
 	}
 
+	//======================= skybox ==========================
 	void renderSkybox(mat4 projection, mat4 view, mat4 model) {
 		skybox->draw(shader_cube, projection, view, model);
 	}
 
+	//===================== particles =========================
 	void renderParticles(mat4 projection, mat4 view, mat4 model) {
 		srand(time(0)); // particles have strange but cool effect
 		int index = rand() % 11;
@@ -189,6 +187,7 @@ public:
 		particles->update();
 	}
 
+	//-------------- true when controller collides with a cube ---------------
 	bool colliding(vec3 hand_pos, vec3 obj_pos, float scale) {
 		float threshold = (float)sqrt(2) * scale;
 		if (glm::distance(hand_pos, obj_pos) <= threshold) {
@@ -198,6 +197,7 @@ public:
 		return false;
 	}
 
+	// delete later; use global bool hit to trigger particles and score increment
 	bool hitting() {
 		if (colliding(gogoPos, cube_curr->getToWorld()[3], 0.2f)) {
 			if (button_X && cube_curr->getID() == "X") return true;
@@ -209,8 +209,7 @@ public:
 		return false;
 	}
 
-	//============== Sound stuff =================
-
+	//=================== Sound =====================
 	void playSound() {
 		music->play();
 	}
@@ -220,7 +219,7 @@ public:
 	}
 
 
-	//============ Cube stuff ================
+	//=================== Cube =====================
 	void renderCubes(mat4 projection, mat4 view, mat4 model) {
 		cube_X->draw(shader_cube, projection, view, model);
 	}
@@ -229,7 +228,7 @@ public:
 		int min = 0;
 		int max = 3;
 		int output = min + (rand() % static_cast<int>(max - min + 1));
-		cout << "out: " << output << endl;
+		//cout << "out: " << output << endl;
 		switch (output) {
 		case 0:
 			return cube_X;
@@ -249,6 +248,7 @@ public:
 		}
 	}
 
+	//----------------- drop a single random cube ----------------- 
 	void dropCubes(mat4 T, mat4 S, mat4 projection, mat4 view) {
 		//Cube* cube = getRandomCube();
 
@@ -258,10 +258,10 @@ public:
 		cube_curr->draw(shader_cube, projection, view);
 	}
 
-
+	//------------- calculate cube positions ------------------
 	void calculate() {
 		double y = cube_track.y;
-		cout << y << endl;
+		//cout << y << endl;
 		srand(time(0));
 		int num = rand() % 25;
 		for (double i = 1; i <= num_instance; i++) {
@@ -273,17 +273,17 @@ public:
 			}
 
 			cube_pos.push_back(cube_track);
-			cout << cube_pos.size() << endl;
+			//cout << cube_pos.size() << endl;
 		}
 
 		cube_curr = getRandomCube();
 	}
 
-
+	//--------------- drop a lot of cubes along designated track ----------------
 	void rainCubes(mat4 projection, mat4 view) {
 
 		mat4 S = scale(mat4(1.0f), vec3(0.1f, 0.1f, 0.1f));
-		cout << cube_pos.size() << endl;
+		//cout << cube_pos.size() << endl;
 		for (int i = 0; i < num_instance; i++) {
 			vec3 track = vec3(cube_pos[i].x, cube_track.y, cube_pos[i].z);
 			mat4 T = translate(mat4(1.0f), track);
@@ -293,6 +293,16 @@ public:
 
 		cube_track.y -= speed * 0.002;
 	}
+
+
+	//================== Score ====================
+	void renderScore(mat4 projection, mat4 view) {
+
+		// use model shader for now
+		vec3 score_pos = vec3(0.0f, 0.0f, -3.0f);
+		my_score->draw(shader_model, projection, view, score_pos);
+	}
+
 };
 
 #endif

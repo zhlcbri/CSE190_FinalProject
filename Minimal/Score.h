@@ -36,25 +36,54 @@
 using namespace std;
 using namespace glm;
 
+bool hit = false;
+
 class Score {
 private:
 	int num = 0;
-	string text = "";
-	vector<Model*> text_model;
+	vector<Model*> text_model; // use vector for easier insertion and deletion
+	Model* zero;
+	Model* one;
+	Model* two;
+	Model* three;
+	Model* four;
+	Model* five;
+	Model* six;
+	Model* seven;
+	Model* eight;
+	Model* nine;
 
-	//unsigned int myTexture;
-	GLuint VBO, VAO, EBO;
+	// add more paths once have obj files ready
+	string const PATH_TWO = "Models/num_two/two.obj";
+	string const PATH_THREE = "Models/num_three/three.obj";
 
 public:
 
 	Score() {
-
-		// once have .obj models, initialize VAO, VBO and EBO
-		// no need for textures; use lighted shaders instead
+		zero = new Model(PATH_TWO);
+		one = new Model(PATH_THREE);
+		two = new Model(PATH_TWO);
+		three = new Model(PATH_THREE);
+		four = new Model(PATH_TWO);
+		five = new Model(PATH_THREE);
+		six = new Model(PATH_TWO);
+		seven = new Model(PATH_THREE);
+		eight = new Model(PATH_TWO);
+		nine = new Model(PATH_THREE);
 	}
 
 	~Score() {
 		// delete every Model* in vector
+		delete(zero);
+		delete(one);
+		delete(two);
+		delete(three);
+		delete(four);
+		delete(five);
+		delete(six);
+		delete(seven);
+		delete(eight);
+		delete(nine);
 	}
 
 	int getNum() {
@@ -67,25 +96,89 @@ public:
 
 	// first let's try printing to console
 	void update() {
-		// update score and text as string form
-		// clear model vector and push_back corresponding text objects
-		
+		// once a cube is hit, update score and text vector
+		if (hit) {
+			cout << "Perfect hit! Score: " << num << endl;
+
+			increment(1);
+
+			text_model.clear();
+			string score_text = to_string(num);
+			cout << "score text: " << score_text << endl;
+			
+			for (unsigned int i = 0; i < score_text.length(); i++) {
+
+				char c = score_text[i];
+
+				switch (c) {
+				case '0':
+					text_model.push_back(zero);
+					break;
+
+				case '1':
+					text_model.push_back(one);
+					break;
+
+				case '2':
+					text_model.push_back(two);
+					break;
+
+				case '3':
+					text_model.push_back(three);
+					break;
+
+				case '4':
+					text_model.push_back(four);
+					break;
+
+				case '5':
+					text_model.push_back(five);
+					break;
+
+				case '6':
+					text_model.push_back(six);
+					break;
+
+				case '7':
+					text_model.push_back(seven);
+					break;
+
+				case '8':
+					text_model.push_back(eight);
+					break;
+
+				case '9':
+					text_model.push_back(nine);
+					break;
+
+				default:
+					break;
+				}
+			}
+		}
 	}
 
-	void draw(Shader shader, const mat4 & projection, const mat4 & view, const mat4 & model) {
+	void draw(Shader shader, const mat4 & projection, const mat4 & view, const vec3 & start_pos) {
 		shader.use();
 		shader.setMat4("projection", projection);
 		shader.setMat4("view", view);
-		shader.setMat4("model", model);
+
+		mat4 R = mat4(1.0f);
+		mat4 S = scale(mat4(1.0f), vec3(0.5f, 0.5f, 0.5f));
+		vec3 pos = start_pos;	
 
 		// send lighting information to shader
-		vec3 lightPos = vec3(0.0f, 1.0f, 0.0f);
+		/*vec3 lightPos = vec3(0.0f, 1.0f, 0.0f);
 		shader.setVec3("lightPos", lightPos);
-		shader.setVec3("viewPos", vec3(view[3].x, view[3].y, view[3].z));
+		shader.setVec3("viewPos", vec3(view[3].x, view[3].y, view[3].z));*/
 
-		// draw each model in vector
-		for (Model* model : text_model) {
-			model->Draw(shader);
+		// draw each model in vector with shifted x position
+		for (Model* text : text_model) {
+			mat4 T = translate(mat4(1.0f), vec3(pos));
+			mat4 M = T * R * S;
+			shader.setMat4("model", M);
+			text->Draw(shader);
+			pos.x += 0.2f;
 		}
 	}
 };

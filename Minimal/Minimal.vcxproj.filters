@@ -57,6 +57,9 @@
     <ClCompile Include="..\Gist-master\libs\kiss_fft130\kiss_fft.c">
       <Filter>Source Files\gist</Filter>
     </ClCompile>
+    <ClCompile Include="..\OVRAvatarSDK\Samples\Mirror\Mirror.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

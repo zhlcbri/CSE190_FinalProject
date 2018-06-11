@@ -774,13 +774,18 @@ struct multiplier {
 int main(int argc, char ** argv) {
 
 	
-	pixel data1;
-	pixel data2;
+	pixel_data data1;
+	pixel_data data2;
+	data1.push_back({ 0,0,0 });//head
+	data1.push_back({ 0,0,0 });
+	data2.push_back({ 0,0,0 });
+	data2.push_back({ 0,0,0 });
 	int visit1 = 0, visit2 = 0;
 	try {
-		srv.bind("get_mandelbrot1", [&](double x, double y, double z) {
+		srv.bind("get_mandelbrot1", [&](double x, double y, double z,double a, double b, double c) {
 
-			data1 = { x,y,z };
+			data1[0] = pixel({ x,y,z });//head
+			data1[1] = pixel({ a,b,c });
 			return data2;
 		});
 	}
@@ -788,9 +793,10 @@ int main(int argc, char ** argv) {
 		std::cout << std::endl << e.what() << std::endl;
 	}
 	try {
-		srv.bind("get_mandelbrot2", [&](double x, double y, double z) {
+		srv.bind("get_mandelbrot2", [&](double x, double y, double z, double a, double b, double c) {
 
-			data2 = { x,y,z };
+			data2[0] = pixel({ x,y,z });
+			data2[1] = pixel({ a,b,c });
 			return data1;
 		});
 	}

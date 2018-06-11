@@ -106,6 +106,7 @@ using namespace glm;
 
 GameManager * gameManager;
 rpc::client client("localhost", 8080);
+glm::vec3 left_eye_track = glm::vec3(0, 0, 0);
 /////testing struct//////////////////
 
 //======= move to GameManager ==========
@@ -659,6 +660,8 @@ protected:
 		handQuaternion[1] = quat_cast(handRotation[1]);
 
 		ovrPosef eyePoses[2];
+		ovrVector3f eyePosition = eyePoses[0].Position;
+		left_eye_track = ovr::toGlm(eyePosition);
 		ovr_GetEyePoses(_session, frame, true, _viewScaleDesc.HmdToEyePose, eyePoses, &_sceneLayer.SensorSampleTime);
 
 		int curIndex;
@@ -732,8 +735,29 @@ protected:
 
 		return vec3(z2x + y2w, z2y - x2w, 1.0f - (x2x + y2y));
 	}
+	vec3 send_receive_position(glm::vec3 vect) {
+		pixel res;
+		try {
+			string e = "erong";
+			std::cout << "Calling get_mandelbrot asynchronically" << std::endl;
+			auto result_obj = client.call("get_mandelbrot1", vect.x, vect.y, vect.z);
+			res = result_obj.as<pixel>();
+			if (res.x == 0 && res.y == 0 && res.z == 0) {
+				throw e;
+			}
 
+			cout << "client2 should receive odd " << res.x << res.y << res.z << endl;
+		}
+		catch (string e) {
+			std::cout << std::endl << e << std::endl;
+		}
+
+		return glm::vec3(res.x, res.y, res.z);
+	}
 	void renderScene(const glm::mat4 & projection, const glm::mat4 & headPose) override {
+		//////for head pos////////////////
+		vec3 head = (vec3)inverse(headPose)[3];
+		vec3 not_my_head = send_receive_position(left_eye_track);
 		// update cube spinning angle
 		angle_r += deg;
 		if (angle_r > 360.0f || angle_r < -360.0f) angle_r = 0.0f;
@@ -741,17 +765,31 @@ protected:
 		// gogo algorithm
 		vec3 handForward = getForwardVector(handQuaternion[0]);
 		vec3 gogoPos = gameManager->gogoHand(handPos[0], inverse(headPose)[3], -(handForward));
+		vec3 not_my_hand = send_receive_position(gogoPos);
 
 		// =========== left hand ==============
 		mat4 T_hand = translate(mat4(1.0f), gogoPos);
+		//////////////////supposed to be///////////////////////////
+		/*mat4 T_not_my_hand = translate(mat4(1.0f), not_my_hand);*/
+		///////////////////////////////////////////////////////////
+		/////////////testing///////////////////////////////////////
+		mat4 T_not_my_hand = translate(mat4(1.0f), vec3(not_my_hand.x, not_my_hand.y, not_my_hand.z));
 		//mat4 T_hand = translate(mat4(1.0f), handPos[0]);
 		mat4 S_hand = scale(mat4(1.0f), vec3(0.005, 0.005, 0.005));
 		mat4 R_hand = handRotation[0];
 		mat4 M_hand = T_hand * R_hand * S_hand;
-		gameManager->renderHand(projection, inverse(headPose), M_hand);
+		mat4 M_not_my_hand = T_not_my_hand * R_hand*S_hand;
+		mat4 M_my_head = translate(glm::mat4(1.0f), head);
+		mat4 M_not_my_head = translate(glm::mat4(1.0f), not_my_head);
+		/*gameManager->renderHand(projection, inverse(headPose), M_hand);
+		gameManager->renderHand(projection, inverse(headPose), M_not_my_hand);*/
 
+		////////////redering head/////////////////
+		
+		gameManager->renderHand(projection, inverse(headPose), M_not_my_head);
+		/////////
 		//============== skybox ===============
-		mat4 M_skybox = scale(mat4(1.0f), vec3(325.0f, 325.0f, 325.0f));	
+		mat4 M_skybox = scale(mat4(1.0f), vec3(325.0f, 325.0f, 325.0f));
 		gameManager->renderSkybox(projection, inverse(headPose), M_skybox);
 
 		// ============ cubes ==============
@@ -779,15 +817,22 @@ protected:
 #undef main
 // Execute our example class
 int main(int argc, char ** argv) {
-	std::cout << "Calling get_mandelbrot asynchronically" << std::endl;
-	
-	auto s = client.async_call("get_mandelbrot1", 1, 1, 1);
-	auto result_obj = client.call("get_data1");
-	auto res = result_obj.get().as<pixel_data>();
-	if (!res.empty()) {
-		auto v = res[0];
-		cout << "client2 should receive 2 from client2" << v.x << v.y << v.z << endl;
-	}
+	/*for (int i = 0; i < 100000; i++) {
+		try {
+			string e = "erong";
+			std::cout << "Calling get_mandelbrot asynchronically" << std::endl;
+			auto result_obj = client.call("get_mandelbrot1", 2 * i, 2 * i, 2 * i);
+			auto res = result_obj.as<pixel>();
+			if (res.x == 0 && res.y == 0 && res.z == 0) {
+				throw e;
+			}
+
+			cout << "client1 should receive odd " << res.x << res.y << res.z << endl;
+		}
+		catch (string e) {
+			std::cout << std::endl << e << std::endl;
+		}
+	}*/
 	int result = -1;
 	try {
 		if (!OVR_SUCCESS(ovr_Initialize(nullptr))) {

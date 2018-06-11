@@ -7,8 +7,8 @@
 #include <vector>
 
 struct pixel {
-    double x, y, z;
-    MSGPACK_DEFINE_ARRAY(x, y, z)
+	double x = 0, y = 0, z = 0;
+	MSGPACK_DEFINE_ARRAY(x, y, z)
 };
 
 using pixel_data = std::vector<pixel>;

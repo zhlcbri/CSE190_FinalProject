@@ -53,7 +53,7 @@ public:
 	unsigned int myTexture;
 
 	GLuint VBO, VAO, EBO;
-	GLuint uProjection, uModelview;
+	GLuint uProjection, uModelview; // delete
 
 	Cube(vector<string> faces, bool cullFrontFace, char * ID = nullptr, mat4 model = mat4(1.0f))
 	{

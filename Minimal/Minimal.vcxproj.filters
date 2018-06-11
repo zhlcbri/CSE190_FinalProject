@@ -25,6 +25,9 @@
     <Filter Include="Source Files\gist">
       <UniqueIdentifier>{2411a0f6-ac6f-4e55-9f2e-164cc68094f8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Score">
+      <UniqueIdentifier>{d7180c4c-98c3-4677-bc32-476514f6dcf9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -90,6 +93,12 @@
     <None Include="shader_disk.frag">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="shader_score.vert">
+      <Filter>Source Files\Score</Filter>
+    </None>
+    <None Include="shader_score.frag">
+      <Filter>Source Files\Score</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stb_image.h">
@@ -151,6 +160,9 @@
     </ClInclude>
     <ClInclude Include="Vector3d.hpp">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Score.h">
+      <Filter>Source Files\Score</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

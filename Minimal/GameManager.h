@@ -8,13 +8,15 @@
 #include "Cube.h"
 #include "Particles.h"
 #include "Music.h"
+#include "Score.h"
 #include <cstdlib>
 #include <ctime>
 using namespace std;
 using namespace glm;
 
-//string const path_hand = "Models/baseball_bat/bat.obj"; // &
+//string const path_hand = "Models/baseball_bat/bat.obj"; // 
 string const PATH_HAND = "Models/soccer_ball/soccer_ball.obj";
+//string const PATH_HAND = "Models/num_three/three.obj";
 
 const char * SOUND_1 = "Audio/my_heart_will_go_on.wav";
 
@@ -26,6 +28,9 @@ const char * CUBE_FRAG = "shader_cube.frag";
 
 const char * PARTICLE_VERT = "shader_particle.vert";
 const char * PARTICLE_FRAG = "shader_particle.frag";
+
+const char * SCORE_VERT = "shader_score.vert";
+const char * SCORE_FRAG = "shader_score.frag";
 
 int num_instance = 4;
 vec3 cube_track = vec3(0, 2.0, -0.5);
@@ -41,17 +46,21 @@ bool button_B = false;
 bool isPressed = false;
 
 bool doOnce = true; // temp
+bool hit = false;
 
 class GameManager
 {
 public:
-	int counter = 0;
-	Model * hand = new Model(PATH_HAND, false);
-	Music * music = new Music(SOUND_1);
+
+	//int counter = 0;
+	Model * hand;
+	Music * music;
+	Score * my_score;
 
 	Shader shader_model = Shader(MODEL_VERT, MODEL_FRAG);
 	Shader shader_cube = Shader(CUBE_VERT, CUBE_FRAG);
 	Shader shader_particle = Shader(PARTICLE_VERT, PARTICLE_FRAG);
+	Shader shader_score = Shader(SCORE_VERT, SCORE_FRAG);
 
 	vector<string> faces_skybox = {
 		"Skybox/front.ppm",
@@ -109,6 +118,9 @@ public:
 	Cube * cube_curr;
 
 	GameManager() {
+		hand = new Model(PATH_HAND, false);
+		music = new Music(SOUND_1);
+
 		skybox = new Cube(faces_skybox, true);
 		particles = new Particles();
 
@@ -118,6 +130,8 @@ public:
 		cube_B = new Cube(faces_X, false, "B");
 
 		cube_curr = new Cube(faces_B, false, "B");
+
+		my_score = new Score();
 	}
 
 	~GameManager() {
@@ -132,6 +146,15 @@ public:
 	}
 
 	void renderGame() {
+	}
+
+	void update() {
+
+		if (hit) {
+			my_score->increment(1);
+			cout << "scoreooooooooooooooooooooo: " << to_string(my_score->getNum()) << endl;
+		}
+
 	}
 
 	vec3 gogoHand(vec3 handPos, vec3 torsoPos, vec3 handForward) {
@@ -175,7 +198,7 @@ public:
 		return false;
 	}
 
-	bool hit() {
+	bool hitting() {
 		if (colliding(gogoPos, cube_curr->getToWorld()[3], 0.2f)) {
 			if (button_X && cube_curr->getID() == "X") return true;
 			else if ((button_Y && cube_curr->getID() == "Y")) return true;

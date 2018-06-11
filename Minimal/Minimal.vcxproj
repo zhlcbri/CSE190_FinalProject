@@ -157,6 +157,8 @@
     <None Include="shader_particle.vert" />
     <None Include="shader_cube.frag" />
     <None Include="shader_cube.vert" />
+    <None Include="shader_score.frag" />
+    <None Include="shader_score.vert" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Gist-master\libs\kiss_fft130\kissfft.hh" />
@@ -176,6 +178,7 @@
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="Particles.h" />
+    <ClInclude Include="Score.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="Vector3d.hpp" />

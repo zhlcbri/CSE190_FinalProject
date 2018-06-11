@@ -623,6 +623,8 @@ protected:
 		button_A = false;
 		button_B = false;
 
+		hit = false;
+		
 		ovrInputState inputState;
 		if (OVR_SUCCESS(ovr_GetInputState(_session, ovrControllerType_Touch, &inputState)))
 		{
@@ -660,6 +662,8 @@ protected:
 				cout << 'B' << endl;
 			}
 		}
+
+		gameManager->update();
 	}
 
 	void onKey(int key, int scancode, int action, int mods) override {
@@ -823,26 +827,32 @@ protected:
 	}
 
 	void renderScene(const glm::mat4 & projection, const glm::mat4 & headPose) override {
-		//gameManager->calculate();
-		//////for head pos////////////////
-		vec3 head = (vec3)inverse(headPose)[3];
-		vec3 my_head_pos = vec3(head.x, head.y, head.z - 2.0);
-		/*not_my_head_pos = send_receive_hand_position(my_head_pos);*/
+
 		// update cube spinning angle
 		angle_r += deg;
 		if (angle_r > 360.0f || angle_r < -360.0f) angle_r = 0.0f;
 
+		//================ head ==================
+		vec3 head = (vec3)inverse(headPose)[3];
+		vec3 my_head_pos = vec3(head.x, head.y, head.z - 2.0);
+		/*not_my_head_pos = send_receive_hand_position(my_head_pos);*/
+		
+		
+		//================ left hand ================
 		// gogo algorithm
 		vec3 handForward = getForwardVector(handQuaternion[0]);
 		gogoPos = gameManager->gogoHand(handPos[0], inverse(headPose)[3], -(handForward));
 		/*vec3 not_my_hand = send_receive_hand_position(gogoPos);*/
 		pair<vec3, vec3> res = send_receive_hand_position(gogoPos, my_head_pos);
 		not_my_head_pos = res.second;
-		//=========== left hand ==============
+		
 		mat4 T_hand = translate(mat4(1.0f), gogoPos);
 		mat4 T_not_my_hand = translate(mat4(1.0f), vec3(res.first.x, res.first.y, res.first.z));
 		//mat4 T_hand = translate(mat4(1.0f), handPos[0]);
 		mat4 S_hand = scale(mat4(1.0f), vec3(0.005, 0.005, 0.005));
+		
+		//mat4 S_hand = scale(mat4(1.0f), vec3(0.5, 0.5, 0.5));
+		
 		mat4 R_hand = handRotation[0];
 		M_hand = T_hand * R_hand * S_hand;
 		M_not_my_hand = T_not_my_hand * R_hand*S_hand;
@@ -870,17 +880,13 @@ protected:
 
 
 		//=========== particles =============
-		//bool hit = (gameManager->colliding(vec3(M_hand[3]), vec3(M_cubeX[3]), 0.2f) && button_X);
-
-
-
 		if (cube_track.y < -4.0) {
 			cube_track.y = 4.0;
 			speed += 1.0;
 			num_instance++;
 			gameManager->calculate();
 		}
-		if (doOnce && !gameManager->hit()) {
+		if (doOnce && !gameManager->hitting()) {
 			//gameManager->dropCubes(T_cubeX, S_cubeX, projection, inverse(headPose));
 			gameManager->rainCubes(projection, inverse(headPose));
 		}
@@ -899,7 +905,7 @@ int main(int argc, char ** argv) {
 	//int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
 	/*for (int i = 0; i < 100000; i++) {
 	try {
-	string e = "erong";
+	string e = "wrong";
 	std::cout << "Calling get_mandelbrot asynchronically" << std::endl;
 	auto result_obj = client.call("get_mandelbrot1", 2 * i, 2 * i, 2 * i);
 	auto res = result_obj.as<pixel>();

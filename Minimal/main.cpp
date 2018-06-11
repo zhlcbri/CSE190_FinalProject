@@ -16,12 +16,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 ************************************************************************************/
-
+#include <rpc/server.h>
+#include <rpc/msgpack.hpp>
+#include <rpc/this_handler.h>
 #include <iostream>
 #include <memory>
 #include <exception>
 #include <algorithm>
-
+#include <math.h>
+#include <time.h>
+#include "Vector3d.hpp"
+#include <rpc/rpc_error.h>
+#include "mandelbrot.h"
 #include <Windows.h>
 
 #define __STDC_FORMAT_MACROS 1
@@ -67,6 +73,9 @@ using namespace std;
 using namespace glm;
 
 GameManager * gameManager;
+rpc::server srv(8080);
+////////////
+
 
 //======= move to GameManager ==========
 vec3 hand_track = vec3(1.0f);
@@ -736,9 +745,63 @@ protected:
 	}
 };
 
+#include <rpc/server.h>
+#include <rpc/this_handler.h>
+#include <rpc/msgpack.hpp>
+double divide(double a, double b) {
+	if (b == 0.0) {
+		rpc::this_handler().respond_error(
+			std::make_tuple(1, "Division by zero"));
+	}
+	return a / b;
+}
 
+struct subtractor {
+	double operator()(double a, double b) {
+		return a - b;
+	}
+};
+
+struct multiplier {
+	double multiply(double a, double b) {
+		return a * b;
+	}
+};
+#include <rpc/msgpack.hpp>
 // Execute our example class
+
+
 int main(int argc, char ** argv) {
+
+	
+	pixel data1;
+	pixel data2;
+	int visit1 = 0, visit2 = 0;
+	try {
+		srv.bind("get_mandelbrot1", [&](double x, double y, double z) {
+
+			data1 = { x,y,z };
+			return data2;
+		});
+	}
+	catch (rpc::rpc_error &e) {
+		std::cout << std::endl << e.what() << std::endl;
+	}
+	try {
+		srv.bind("get_mandelbrot2", [&](double x, double y, double z) {
+
+			data2 = { x,y,z };
+			return data1;
+		});
+	}
+	catch (rpc::rpc_error &e) {
+		std::cout << std::endl << e.what() << std::endl;
+	}
+
+	srv.run();
+
+
+
 	int result = -1;
 	try {
 		if (!OVR_SUCCESS(ovr_Initialize(nullptr))) {

@@ -16,7 +16,7 @@ using namespace glm;
 //string const path_hand = "Models/baseball_bat/bat.obj"; // &
 string const PATH_HAND = "Models/soccer_ball/soccer_ball.obj";
 
-const char * SOUND_1 = "Audio/my_heart_will_go_on.wav";
+const char * SOUND_1 = "Audio/flowers_of_fire.wav";
 
 const char * MODEL_VERT = "model_loading.vert";
 const char * MODEL_FRAG = "model_loading.frag";

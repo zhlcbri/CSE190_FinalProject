@@ -113,6 +113,7 @@ public:
 
 			text_model.clear();
 			string score_text = to_string(num);
+			
 			cout << "score text: " << score_text << endl;
 			
 			for (unsigned int i = 0; i < score_text.length(); i++) {

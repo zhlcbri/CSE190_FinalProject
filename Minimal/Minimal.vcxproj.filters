@@ -99,6 +99,9 @@
     <None Include="shader_score.frag">
       <Filter>Source Files\Score</Filter>
     </None>
+    <None Include="model_loading_2.frag">
+      <Filter>Source Files\Model</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stb_image.h">

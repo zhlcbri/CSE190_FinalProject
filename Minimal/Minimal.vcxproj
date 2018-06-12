@@ -150,6 +150,7 @@
     <None Include="..\Gist-master\libs\kiss_fft130\README" />
     <None Include="model_loading.frag" />
     <None Include="model_loading.vert" />
+    <None Include="model_loading_2.frag" />
     <None Include="packages.config" />
     <None Include="shader_cloud.frag" />
     <None Include="shader_disk.frag" />

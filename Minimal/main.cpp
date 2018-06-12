@@ -104,6 +104,8 @@ vec3 gogoPos;
 vec3 gogoPos_right;
 
 int flag_init = 0;
+pixel_data another_client;
+
 ///////////////////////////////////////////////////////////////////////////////
 //
 // GLEW gives cross platform access to OpenGL 3.x+ functionality.  
@@ -126,7 +128,8 @@ using namespace std;
 using namespace glm;
 
 GameManager * gameManager;
-string const addr = "128.54.70.72";
+
+string const addr = "localhost";/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*//
 rpc::client client(addr, 8080);
 glm::vec3 left_eye_track = glm::vec3(0, 0, 0);
 
@@ -785,10 +788,14 @@ protected:
 		ovr_RecenterTrackingOrigin(_session);
 
 
-
+		pixel p = { 0,0,0 };
+		for (int i = 0; i < 8; i++) {
+			another_client.push_back(p);
+		}
 		gameManager = new GameManager();
 		gameManager->playSound();
 		gameManager->calculate();
+	
 
 	}
 
@@ -814,14 +821,20 @@ protected:
 
 		return vec3(z2x + y2w, z2y - x2w, 1.0f - (x2x + y2y));
 	}
-	pair<vec3, vec3> send_receive_hand_position(glm::vec3 head, glm::vec3 hand) {
+	pixel_data send_receive_hand_position(glm::vec3 head, glm::vec3 left_hand,
+												glm::vec3 right_hand, glm::vec3 cube1, 
+												glm::vec3 cube2, glm::vec3 cube3, 
+												glm::vec3 cube4, glm::vec3 score ) {
 		pixel_data res;
 		try {
 			string e = "wrong";
 			//std::cout << "Calling get_mandelbrot asynchronically" << std::endl;
-			auto result_obj = client.call("get_mandelbrot2", head.x, head.y, head.z, hand.x, hand.y, hand.z);
+			auto result_obj = client.call("get_mandelbrot2", head.x, head.y, head.z, left_hand.x, left_hand.y, left_hand.z,
+				right_hand.x, right_hand.y, right_hand.z, cube1.x, cube1.y, cube1.z,
+				cube2.x, cube2.y, cube2.z, cube3.x, cube3.y, cube3.z,
+				cube4.x, cube4.y, cube4.z, score.x, score.y, score.z);
 			res = result_obj.as<pixel_data>();
-			if (res.size() != 2) {
+			if (res.size() != 8) {
 				throw e;
 			}
 
@@ -830,8 +843,8 @@ protected:
 		catch (string e) {
 			std::cout << std::endl << e << std::endl;
 		}
-
-		return make_pair(glm::vec3(res[0].x, res[0].y, res[0].z), glm::vec3(res[1].x, res[1].y, res[1].z));
+		return res;
+		
 	}
 
 	void renderScene(const glm::mat4 & projection, const glm::mat4 & headPose) override {
@@ -842,54 +855,53 @@ protected:
 
 		//================ head ==================
 		vec3 head = (vec3)inverse(headPose)[3];
-		vec3 my_head_pos = vec3(head.x, head.y, head.z - 2.0);
+		vec3 my_head_pos = vec3(head.x, head.y, head.z - 10.0);
 		/*not_my_head_pos = send_receive_hand_position(my_head_pos);*/
 		
 		
 		//================ left hand ================
 		// gogo algorithm
 		vec3 handForward = getForwardVector(handQuaternion[0]);
+		vec3 handForward_right = getForwardVector(handQuaternion[1]);
 		gogoPos = gameManager->gogoHand(handPos[0], inverse(headPose)[3], -(handForward));
+		gogoPos_right = gameManager->gogoHand(handPos[1], inverse(headPose)[3], -(handForward_right));
 		/*vec3 not_my_hand = send_receive_hand_position(gogoPos);*/
-		pair<vec3, vec3> res = send_receive_hand_position(gogoPos, my_head_pos);
-		not_my_head_pos = res.second;
+		
+		result[0] = my_head_pos;
+		result[1] = gogoPos;
+		result[2] = gogoPos_right;
+		another_client = send_receive_hand_position(result[0],result[1],result[2], result[3], result[4], result[5], result[6], result[7]);
+		not_my_head_pos = vec3(another_client[0].x, another_client[0].y, another_client[0].z);/////////////////////////////////////////////////////////////todo
 		
 		mat4 T_hand = translate(mat4(1.0f), gogoPos);
-		mat4 T_not_my_hand = translate(mat4(1.0f), vec3(res.first.x, res.first.y, res.first.z));
-		//mat4 T_hand = translate(mat4(1.0f), handPos[0]);
-		mat4 S_hand = scale(mat4(1.0f), vec3(0.005, 0.005, 0.005));
-	
-		mat4 R_hand = handRotation[0];
-		M_hand = T_hand * R_hand * S_hand;
-		M_not_my_hand = T_not_my_hand * R_hand*S_hand;
-
-		gameManager->renderHand(projection, inverse(headPose), M_hand);
-		gameManager->renderHand(projection, inverse(headPose), M_not_my_hand);
-
-		//================ right hand ================
-		// gogo algorithm
-		vec3 handForward_right = getForwardVector(handQuaternion[1]);
-		gogoPos_right = gameManager->gogoHand(handPos[1], inverse(headPose)[3], -(handForward_right));
-		/*vec3 not_my_hand = send_receive_hand_position(gogoPos_right);*/
-		pair<vec3, vec3> res_right = send_receive_hand_position(gogoPos_right, my_head_pos);
-		not_my_head_pos = res_right.second;
-
 		mat4 T_hand_right = translate(mat4(1.0f), gogoPos_right);
-		mat4 T_not_my_hand_right = translate(mat4(1.0f), vec3(res_right.first.x, res_right.first.y, res_right.first.z));
-		//mat4 T_hand_right = translate(mat4(1.0f), handPos[1]);
-		mat4 S_hand_right = scale(mat4(1.0f), vec3(0.005, 0.005, 0.005));
-
+		mat4 T_not_my_hand = translate(mat4(1.0f), vec3(another_client[1].x, another_client[1].y, another_client[1].z));
+		mat4 T_not_my_hand_right = translate(mat4(1.0f), vec3(another_client[2].x, another_client[2].y, another_client[2].z));
+		//mat4 T_hand = translate(mat4(1.0f), handPos[0]);
+		mat4 S_hand = scale(mat4(1.0f), /*vec3(0.005, 0.005, 0.005)*/vec3(0.5, 0.5, 0.5));
+		mat4 S_hand_right = scale(mat4(1.0f), /*vec3(0.005, 0.005, 0.005)*/vec3(0.5, 0.5, 0.5));
+		mat4 R_hand = handRotation[0];
 		mat4 R_hand_right = handRotation[1];
+		M_hand = T_hand * R_hand * S_hand;
 		M_hand_right = T_hand_right * R_hand_right * S_hand_right;
+		M_not_my_hand = T_not_my_hand * R_hand*S_hand;
+		
+		gameManager->renderHand(projection, inverse(headPose), M_hand);
+		gameManager->renderHand_2(projection, inverse(headPose), M_not_my_hand);
+
+		
+
+
+
 		M_not_my_hand_right = T_not_my_hand_right * R_hand_right *S_hand_right;
 
 		gameManager->renderHand(projection, inverse(headPose), M_hand_right);
-		gameManager->renderHand(projection, inverse(headPose), M_not_my_hand_right);
+		gameManager->renderHand_2(projection, inverse(headPose), M_not_my_hand_right);
 
 		//================= head =====================
-		M_my_head = translate(glm::mat4(1.0f), head);
+		M_my_head = translate(glm::mat4(1.0f), head)*scale(mat4(1.0f), vec3(0.3, 0.3, 0.3));
 		M_not_my_head = translate(glm::mat4(1.0f), not_my_head_pos);
-		gameManager->renderCubes(projection, inverse(headPose), M_not_my_head);
+		//gameManager->renderHead(projection, inverse(headPose), M_not_my_head);
 
 
 		//============== skybox ===============
@@ -908,7 +920,6 @@ protected:
 		if (cube_track.y < -4.0) {
 			cube_track.y = 4.0;
 			speed += 0.01;
-			
 			gameManager->calculate();
 		}
 		

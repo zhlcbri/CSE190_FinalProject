@@ -623,7 +623,7 @@ protected:
 		button_A = false;
 		button_B = false;
 
-		hit = false;
+		//hit = false;
 		
 		ovrInputState inputState;
 		if (OVR_SUCCESS(ovr_GetInputState(_session, ovrControllerType_Touch, &inputState)))
@@ -664,7 +664,7 @@ protected:
 		}
 
 		// temp
-		if (button_X) hit = true;
+		//if (button_X) hit = true;
 
 		gameManager->update();
 	}
@@ -886,17 +886,20 @@ protected:
 		if (cube_track.y < -4.0) {
 			cube_track.y = 4.0;
 			speed += 1.0;
-			num_instance++;
+			
 			gameManager->calculate();
 		}
-		if (doOnce && !gameManager->hitting()) {
+		
 			//gameManager->dropCubes(T_cubeX, S_cubeX, projection, inverse(headPose));
 			gameManager->rainCubes(projection, inverse(headPose));
-		}
-		else {
-			doOnce = false;
-			gameManager->renderParticles(projection, inverse(headPose), M_cubeX);
-		}
+		
+
+			
+
+		
+
+
+
 		hand_track = handPos[0];
 		//cube_track.y -= 0.001;
 

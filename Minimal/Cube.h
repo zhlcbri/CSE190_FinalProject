@@ -42,6 +42,7 @@ float angle_r = 0.0f;
 
 class Cube {
 private:
+	
 	char * myID = nullptr; // X, Y, A, B
 	mat4 T = mat4(1.0f); // translation 
 	mat4 R = mat4(1.0f); // rotation 
@@ -49,11 +50,11 @@ private:
 	mat4 toWorld = mat4(1.0f); // assign to T * R * S every frame
 
 public:
+	bool is_hit = false;
 	bool cullFront = false;
 	unsigned int myTexture;
 
 	GLuint VBO, VAO, EBO;
-	GLuint uProjection, uModelview; // delete
 
 	Cube(vector<string> faces, bool cullFrontFace, char * ID = nullptr, mat4 model = mat4(1.0f))
 	{

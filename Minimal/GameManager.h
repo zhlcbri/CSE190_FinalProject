@@ -11,6 +11,7 @@
 #include "Score.h"
 #include <cstdlib>
 #include <ctime>
+#include <map>
 using namespace std;
 using namespace glm;
 
@@ -35,6 +36,8 @@ const char * SCORE_FRAG = "shader_score.frag";
 int num_instance = 4;
 vec3 cube_track = vec3(0, 2.0, -0.5);
 vector<vec3> cube_pos;
+vector<Cube*> cube_queue;
+vector<Cube*> cube_queue_copy;
 double speed = 1.0;
 mat4 fall = glm::translate(glm::mat4(1.0f), vec3(0.0f, -0.1f, 0.0f));
 
@@ -60,7 +63,7 @@ public:
 	Shader shader_cube = Shader(CUBE_VERT, CUBE_FRAG);
 	Shader shader_particle = Shader(PARTICLE_VERT, PARTICLE_FRAG);
 	Shader shader_score = Shader(SCORE_VERT, SCORE_FRAG);
-
+	
 	vector<string> faces_cry = {
 		"CubeTex/emoji_cry.ppm",
 		"CubeTex/emoji_cry.ppm",
@@ -90,12 +93,12 @@ public:
 	};
 
 	vector<string> faces_X = {
-		"CubeTex/img_X.ppm",
-		"CubeTex/img_X.ppm",
-		"CubeTex/img_X.ppm",
-		"CubeTex/img_X.ppm",
-		"CubeTex/img_X.ppm",
-		"CubeTex/img_X.ppm",
+		"CubeTex/X.ppm",
+		"CubeTex/X.ppm",
+		"CubeTex/X.ppm",
+		"CubeTex/X.ppm",
+		"CubeTex/X.ppm",
+		"CubeTex/X.ppm",
 	};
 
 	vector<string> faces_Y = {
@@ -108,21 +111,21 @@ public:
 	};
 
 	vector<string> faces_A = {
-		"CubeTex/img_A.ppm",
-		"CubeTex/img_A.ppm",
-		"CubeTex/img_A.ppm",
-		"CubeTex/img_A.ppm",
-		"CubeTex/img_A.ppm",
-		"CubeTex/img_A.ppm",
+		"CubeTex/A.ppm",
+		"CubeTex/A.ppm",
+		"CubeTex/A.ppm",
+		"CubeTex/A.ppm",
+		"CubeTex/A.ppm",
+		"CubeTex/A.ppm",
 	};
 
 	vector<string> faces_B = {
-		"CubeTex/img_B.ppm",
-		"CubeTex/img_B.ppm",
-		"CubeTex/img_B.ppm",
-		"CubeTex/img_B.ppm",
-		"CubeTex/img_B.ppm",
-		"CubeTex/img_B.ppm",
+		"CubeTex/B.ppm",
+		"CubeTex/B.ppm",
+		"CubeTex/B.ppm",
+		"CubeTex/B.ppm",
+		"CubeTex/B.ppm",
+		"CubeTex/B.ppm",
 	};
 
 	Cube * skybox;
@@ -132,7 +135,6 @@ public:
 	Cube * cube_Y;
 	Cube * cube_A;
 	Cube * cube_B;
-	Cube * cube_curr;
 
 	Cube * head_cry;
 	Cube * head_wink;
@@ -148,8 +150,15 @@ public:
 		cube_Y = new Cube(faces_Y, false, "Y");
 		cube_A = new Cube(faces_A, false, "A");
 		cube_B = new Cube(faces_B, false, "B");
-
-		cube_curr = new Cube(faces_B, false, "B");
+		cube_queue.push_back(cube_X);
+		cube_queue.push_back(cube_Y);
+		cube_queue.push_back(cube_A);
+		cube_queue.push_back(cube_B);
+		cube_pos.push_back(vec3(0, 0, 0));
+		cube_pos.push_back(vec3(0, 0, 0));
+		cube_pos.push_back(vec3(0, 0, 0));
+		cube_pos.push_back(vec3(0, 0, 0));
+		cube_queue_copy = cube_queue;
 
 		head_cry = new Cube(faces_cry, false);
 		head_wink = new Cube(faces_wink, false);
@@ -172,6 +181,8 @@ public:
 	}
 
 	void update() {
+		//hit = hitting();
+		//cout << "hit: " << hit << endl;
 		my_score->update();
 	}
 
@@ -188,7 +199,7 @@ public:
 	//===================== calculate controller position ===================
 	vec3 gogoHand(vec3 handPos, vec3 torsoPos, vec3 handForward) {
 		float threshold = 0.50f; // D
-		float coeff = 7.5f; // k
+		float coeff = 2.5f; // k
 
 		float distFromTorso = length(handPos - torsoPos); // R_r
 		if (distFromTorso > threshold) {
@@ -223,7 +234,7 @@ public:
 
 	//-------------- true when controller collides with a cube ---------------
 	bool colliding(vec3 hand_pos, vec3 obj_pos, float scale) {
-		float threshold = (float)sqrt(2) * scale;
+		float threshold = (float)sqrt(3) * scale;
 		if (glm::distance(hand_pos, obj_pos) <= threshold) {
 			//cout << "colliding" << endl;
 			return true;
@@ -233,13 +244,27 @@ public:
 
 	// delete later; use global bool hit to trigger particles and score increment
 	bool hitting() {
-		if (colliding(gogoPos, cube_curr->getToWorld()[3], 0.2f)) {
-			if (button_X && cube_curr->getID() == "X") return true;
-			else if ((button_Y && cube_curr->getID() == "Y")) return true;
-			else if ((button_A && cube_curr->getID() == "A")) return true;
-			else if ((button_B && cube_curr->getID() == "B")) return true;
+		for (int i = 0; i < cube_queue.size(); i++) {
+			if (colliding(gogoPos, cube_queue[i]->getToWorld()[3], 0.3f)) {
+				
+				if (button_X && cube_queue[i]->getID() == "X") {
+					cube_queue[i]->is_hit = true;
+					return true;
+				}
+				else if ((button_Y && cube_queue[i]->getID() == "Y")) {
+					cube_queue[i]->is_hit = true;
+					return true;
+				}
+				else if ((button_A && cube_queue[i]->getID() == "A")) {
+					cube_queue[i]->is_hit = true;
+					return true;
+				}
+				else if ((button_B && cube_queue[i]->getID() == "B")) {
+					cube_queue[i]->is_hit = true;
+					return true;
+				}
+			}
 		}
-
 		return false;
 	}
 
@@ -282,50 +307,88 @@ public:
 		}
 	}
 
+	int getRandom() {
+		int min = 0;
+		int max = 3;
+		int output = min + (rand() % static_cast<int>(max - min + 1));
+		return output;
+	}
+
 	//----------------- drop a single random cube ----------------- 
-	void dropCubes(mat4 T, mat4 S, mat4 projection, mat4 view) {
+	void dropCubes(Cube * cube, mat4 T, mat4 S, mat4 projection, mat4 view) {
 		//Cube* cube = getRandomCube();
 
-		cube_curr->translate(T);
-		cube_curr->scale(S);
+		cube->translate(T);
+		cube->scale(S);
 
-		cube_curr->draw(shader_cube, projection, view);
+		cube->draw(shader_cube, projection, view);
 	}
 
 	//------------- calculate cube positions ------------------
 	void calculate() {
 		double y = cube_track.y;
+		int num = rand() % 15;
 		//cout << y << endl;
 		srand(time(0));
-		int num = rand() % 25;
-		for (double i = 1; i <= num_instance; i++) {
-			if (i < 3) {
-				cube_track = vec3(-0.1*num + i, y, -0.1*i*num);
+		for (int i = 0; i < cube_queue.size(); i++) {
+			int cube_i = rand() % 3;
+					
+			//////////////////////////
+			if (cube_queue_copy[cube_i]->getID() == "X") {
+				Cube * copy = new Cube(faces_X, false, "X");
+				cube_queue[i] = copy;
+			}
+			else if ((cube_queue_copy[cube_i]->getID() == "Y")) {
+				Cube * copy = new Cube(faces_Y, false, "Y");
+				cube_queue[i] = copy;
+			}
+			else if ((cube_queue_copy[cube_i]->getID() == "A")) {
+				Cube * copy = new Cube(faces_A, false, "A");
+				cube_queue[i] = copy;	
+			}
+			else if ((cube_queue_copy[cube_i]->getID() == "B")) {
+				Cube * copy = new Cube(faces_B, false, "B");
+				cube_queue[i] = copy;
+			}
+			//////////////////////////
+
+			double x = 0.1*(i*num + num);
+			if (i % 2 == 0) {
+				cube_track = vec3(x, y, -0.1*(i - 1.6)*num);
 			}
 			else {
-				cube_track = vec3(0.1*num + i, y, -0.1*(i - 1.6)*num);
+				cube_track = vec3(-x, y, -0.1*(i - 1.6)*num);
 			}
+			cube_queue[i]->is_hit = false;
+			cube_pos[i] = (cube_track);
 
-			cube_pos.push_back(cube_track);
-			//cout << cube_pos.size() << endl;
+
+			cube_queue[i]->is_hit = false;
+			hit = false;
 		}
-
-		cube_curr = getRandomCube();
 	}
 
 	//--------------- drop a lot of cubes along designated track ----------------
 	void rainCubes(mat4 projection, mat4 view) {
-
+		hitting();
 		mat4 S = scale(mat4(1.0f), vec3(0.1f, 0.1f, 0.1f));
-		//cout << cube_pos.size() << endl;
-		for (int i = 0; i < num_instance; i++) {
-			vec3 track = vec3(cube_pos[i].x, cube_track.y, cube_pos[i].z);
+		
+		vec3 track;
+		for (int i = 0; i < 4; i++) {
+			track = vec3(cube_pos[i].x, cube_track.y, cube_pos[i].z);
 			mat4 T = translate(mat4(1.0f), track);
-			//cube_curr = getRandomCube();//
-			dropCubes(T, S, projection, view);
+			if (cube_queue[i]->is_hit == false) {
+				//cout << "cube" << endl;
+				dropCubes(cube_queue[i], T, S, projection, view);
+			}
+			else {
+				// << "pa" << endl;
+				renderParticles(projection, view, cube_queue[i]->getToWorld());
+			}
 		}
+		
 
-		cube_track.y -= speed * 0.002;
+		cube_track.y -=  0.003;
 	}
 
 

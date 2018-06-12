@@ -54,22 +54,30 @@ private:
 	Model* nine;
 
 	// add more paths once have obj files ready
-	string const PATH_TWO = "Models/num_two/two.obj";
-	string const PATH_THREE = "Models/num_three/three.obj";
+	string const PATH_ZERO = "Models/zero/zero.obj";
+	string const PATH_ONE = "Models/one/one.obj";
+	string const PATH_TWO = "Models/two/two.obj";
+	string const PATH_THREE = "Models/three/three.obj";
+	string const PATH_FOUR = "Models/four/four.obj";
+	string const PATH_FIVE = "Models/five/five.obj";
+	string const PATH_SIX = "Models/six/six.obj";
+	string const PATH_SEVEN = "Models/seven/seven.obj";
+	string const PATH_EIGHT = "Models/eight/eight.obj";
+	string const PATH_NINE = "Models/nine/nine.obj";
 
 public:
 
 	Score() {
-		zero = new Model(PATH_TWO);
-		one = new Model(PATH_THREE);
+		zero = new Model(PATH_ZERO);
+		one = new Model(PATH_ONE);
 		two = new Model(PATH_TWO);
 		three = new Model(PATH_THREE);
-		four = new Model(PATH_TWO);
-		five = new Model(PATH_THREE);
-		six = new Model(PATH_TWO);
-		seven = new Model(PATH_THREE);
-		eight = new Model(PATH_TWO);
-		nine = new Model(PATH_THREE);
+		four = new Model(PATH_FOUR);
+		five = new Model(PATH_FIVE);
+		six = new Model(PATH_SIX);
+		seven = new Model(PATH_SEVEN);
+		eight = new Model(PATH_EIGHT);
+		nine = new Model(PATH_NINE);
 	}
 
 	~Score() {
@@ -178,7 +186,7 @@ public:
 			mat4 M = T * R * S;
 			shader.setMat4("model", M);
 			text->Draw(shader);
-			pos.x += 0.2f;
+			pos.x += 0.3f;
 		}
 	}
 };

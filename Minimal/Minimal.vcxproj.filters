@@ -1,0 +1,171 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\Particles">
+      <UniqueIdentifier>{7092db4c-237f-4dc3-bf01-aa3c38988c5a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Model">
+      <UniqueIdentifier>{aa9694bc-2490-49a1-b185-0a7cf3773370}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Shader">
+      <UniqueIdentifier>{78df3475-6362-4f91-bdce-da4a171adf8a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gist">
+      <UniqueIdentifier>{2411a0f6-ac6f-4e55-9f2e-164cc68094f8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Score">
+      <UniqueIdentifier>{d7180c4c-98c3-4677-bc32-476514f6dcf9}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Particles.cpp">
+      <Filter>Source Files\Particles</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Gist-master\src\Gist.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Gist-master\src\core\CoreFrequencyDomainFeatures.cpp">
+      <Filter>Source Files\gist</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Gist-master\src\core\CoreTimeDomainFeatures.cpp">
+      <Filter>Source Files\gist</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Gist-master\src\fft\WindowFunctions.cpp">
+      <Filter>Source Files\gist</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Gist-master\src\mfcc\MFCC.cpp">
+      <Filter>Source Files\gist</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Gist-master\src\onset-detection-functions\OnsetDetectionFunction.cpp">
+      <Filter>Source Files\gist</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Gist-master\src\pitch\Yin.cpp">
+      <Filter>Source Files\gist</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Gist-master\libs\kiss_fft130\kiss_fft.c">
+      <Filter>Source Files\gist</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+    <None Include="shader_particle.frag">
+      <Filter>Source Files\Particles</Filter>
+    </None>
+    <None Include="shader_particle.vert">
+      <Filter>Source Files\Particles</Filter>
+    </None>
+    <None Include="shader_cube.frag">
+      <Filter>Source Files\Shader</Filter>
+    </None>
+    <None Include="shader_cube.vert">
+      <Filter>Source Files\Shader</Filter>
+    </None>
+    <None Include="..\Gist-master\libs\kiss_fft130\COPYING">
+      <Filter>Source Files\gist</Filter>
+    </None>
+    <None Include="..\Gist-master\libs\kiss_fft130\README">
+      <Filter>Source Files\gist</Filter>
+    </None>
+    <None Include="model_loading.frag">
+      <Filter>Source Files\Model</Filter>
+    </None>
+    <None Include="model_loading.vert">
+      <Filter>Source Files\Model</Filter>
+    </None>
+    <None Include="shader_cloud.frag">
+      <Filter>Source Files\Shader</Filter>
+    </None>
+    <None Include="shader_disk.frag">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="shader_score.vert">
+      <Filter>Source Files\Score</Filter>
+    </None>
+    <None Include="shader_score.frag">
+      <Filter>Source Files\Score</Filter>
+    </None>
+    <None Include="model_loading_2.frag">
+      <Filter>Source Files\Model</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stb_image.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GameManager.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Cube.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Particles.h">
+      <Filter>Source Files\Particles</Filter>
+    </ClInclude>
+    <ClInclude Include="Music.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>Source Files\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>Source Files\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader.h">
+      <Filter>Source Files\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Gist-master\src\Gist.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Gist-master\src\core\CoreFrequencyDomainFeatures.h">
+      <Filter>Source Files\gist</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Gist-master\src\core\CoreTimeDomainFeatures.h">
+      <Filter>Source Files\gist</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Gist-master\src\fft\WindowFunctions.h">
+      <Filter>Source Files\gist</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Gist-master\src\mfcc\MFCC.h">
+      <Filter>Source Files\gist</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Gist-master\src\onset-detection-functions\OnsetDetectionFunction.h">
+      <Filter>Source Files\gist</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Gist-master\src\pitch\Yin.h">
+      <Filter>Source Files\gist</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Gist-master\libs\kiss_fft130\_kiss_fft_guts.h">
+      <Filter>Source Files\gist</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Gist-master\libs\kiss_fft130\kiss_fft.h">
+      <Filter>Source Files\gist</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Gist-master\libs\kiss_fft130\kissfft.hh">
+      <Filter>Source Files\gist</Filter>
+    </ClInclude>
+    <ClInclude Include="mandelbrot.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Vector3d.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Score.h">
+      <Filter>Source Files\Score</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

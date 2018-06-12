@@ -104,6 +104,7 @@ public:
 
 	// first let's try printing to console
 	void update() {
+		//cout << "score: " << endl;
 		// once a cube is hit, update score and text vector
 		if (hit) {
 			cout << "Perfect hit! Score: " << num << endl;
@@ -176,9 +177,9 @@ public:
 		vec3 pos = start_pos;	
 
 		// send lighting information to shader
-		/*vec3 lightPos = vec3(0.0f, 1.0f, 0.0f);
+		vec3 lightPos = vec3(0.0f, 1.0f, 0.0f);
 		shader.setVec3("lightPos", lightPos);
-		shader.setVec3("viewPos", vec3(view[3].x, view[3].y, view[3].z));*/
+		shader.setVec3("viewPos", vec3(view[3].x, view[3].y, view[3].z));
 
 		// draw each model in vector with shifted x position
 		for (Model* text : text_model) {

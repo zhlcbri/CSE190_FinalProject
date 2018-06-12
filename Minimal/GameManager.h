@@ -33,11 +33,12 @@ const char * PARTICLE_FRAG = "shader_particle.frag";
 const char * SCORE_VERT = "shader_score.vert";
 const char * SCORE_FRAG = "shader_score.frag";
 
-int num_instance = 4;
+
 vec3 cube_track = vec3(0, 2.0, -0.5);
 vector<vec3> cube_pos;
 vector<Cube*> cube_queue;
 vector<Cube*> cube_queue_copy;
+vector<Particles*> particles_vec;
 double speed = 1.0;
 mat4 fall = glm::translate(glm::mat4(1.0f), vec3(0.0f, -0.1f, 0.0f));
 
@@ -49,6 +50,19 @@ bool button_B = false;
 bool isPressed = false;
 
 bool doOnce = true; // temp
+
+// some colors I like
+vec3 red = vec3(1.000, 0.000, 0.000);
+vec3 pink = vec3(1.000, 0.078, 0.576); // deep pink
+vec3 yellow = vec3(1.000, 1.000, 0.000);
+vec3 purple = vec3(0.502, 0.000, 0.502);
+vec3 indigo = vec3(0.294, 0.000, 0.510); 
+vec3 lime = vec3(0.000, 1.000, 0.000);
+vec3 aqua = vec3(0.000, 1.000, 1.000); 
+vec3 aquamarine = vec3(0.498, 1.000, 0.831); 
+vec3 sky = vec3(0.000, 0.749, 1.000); // deep sky blue
+vec3 blue = vec3(0.000, 0.000, 1.000); 
+vec3 lavender = vec3(1.000, 0.941, 0.961); // lavender blush
 
 class GameManager
 {
@@ -130,7 +144,10 @@ public:
 
 	Cube * skybox;
 	Particles * particles;
-
+	Particles * particles_1;
+	Particles * particles_2;
+	Particles * particles_3;
+	Particles * particles_4;
 	Cube * cube_X;
 	Cube * cube_Y;
 	Cube * cube_A;
@@ -144,16 +161,27 @@ public:
 		music = new Music(SOUND_1);
 
 		skybox = new Cube(faces_skybox, true);
-		particles = new Particles();
 
-		cube_X = new Cube(faces_X, false, "X");
+		particles_1 = new Particles(pink, aqua);
+		particles_2 = new Particles(lime, pink);
+		particles_3 = new Particles(yellow, purple);
+		particles_4 = new Particles(aquamarine, red);
+
+		cube_X = new Cube(faces_B, false, "X");
 		cube_Y = new Cube(faces_Y, false, "Y");
 		cube_A = new Cube(faces_A, false, "A");
 		cube_B = new Cube(faces_B, false, "B");
+
 		cube_queue.push_back(cube_X);
 		cube_queue.push_back(cube_Y);
 		cube_queue.push_back(cube_A);
 		cube_queue.push_back(cube_B);
+
+		particles_vec.push_back(particles_1);
+		particles_vec.push_back(particles_2);
+		particles_vec.push_back(particles_3);
+		particles_vec.push_back(particles_4);
+
 		cube_pos.push_back(vec3(0, 0, 0));
 		cube_pos.push_back(vec3(0, 0, 0));
 		cube_pos.push_back(vec3(0, 0, 0));
@@ -225,18 +253,21 @@ public:
 	}
 
 	//===================== particles =========================
-	void renderParticles(mat4 projection, mat4 view, mat4 model) {
+	void renderParticles(Particles * p, mat4 projection, mat4 view, mat4 model) {
 		srand(time(0)); // particles have strange but cool effect
 		int index = rand() % 11;
-		particles->draw(shader_particle, projection, view, model, index);
-		particles->update();
+
+		
+
+		p->draw(shader_particle, projection, view, model, index);
+		p->update();
 	}
 
 	//-------------- true when controller collides with a cube ---------------
 	bool colliding(vec3 hand_pos, vec3 obj_pos, float scale) {
 		float threshold = (float)sqrt(3) * scale;
 		if (glm::distance(hand_pos, obj_pos) <= threshold) {
-			//cout << "colliding" << endl;
+			// << "colliding" << endl;
 			return true;
 		}
 		return false;
@@ -245,23 +276,31 @@ public:
 	// delete later; use global bool hit to trigger particles and score increment
 	bool hitting() {
 		for (int i = 0; i < cube_queue.size(); i++) {
-			if (colliding(gogoPos, cube_queue[i]->getToWorld()[3], 0.3f)) {
-				
+			if (colliding(gogoPos, cube_queue[i]->getToWorld()[3], 0.3f)
+				|| colliding(gogoPos_right, cube_queue[i]->getToWorld()[3], 0.3f)) {
+
 				if (button_X && cube_queue[i]->getID() == "X") {
 					cube_queue[i]->is_hit = true;
+					hit = true;
 					return true;
 				}
 				else if ((button_Y && cube_queue[i]->getID() == "Y")) {
 					cube_queue[i]->is_hit = true;
+					hit = true;
 					return true;
 				}
 				else if ((button_A && cube_queue[i]->getID() == "A")) {
 					cube_queue[i]->is_hit = true;
+					hit = true;
 					return true;
 				}
 				else if ((button_B && cube_queue[i]->getID() == "B")) {
 					cube_queue[i]->is_hit = true;
+					hit = true;
 					return true;
+				}
+				else {
+					hit = false;
 				}
 			}
 		}
@@ -328,27 +367,33 @@ public:
 	void calculate() {
 		double y = cube_track.y;
 		int num = rand() % 15;
-		//cout << y << endl;
 		srand(time(0));
+
+		int color_index = 0;
+
 		for (int i = 0; i < cube_queue.size(); i++) {
-			int cube_i = rand() % 3;
+			int cube_i = rand() % 4;
 					
 			//////////////////////////
 			if (cube_queue_copy[cube_i]->getID() == "X") {
 				Cube * copy = new Cube(faces_X, false, "X");
 				cube_queue[i] = copy;
+				color_index = 0;
 			}
 			else if ((cube_queue_copy[cube_i]->getID() == "Y")) {
 				Cube * copy = new Cube(faces_Y, false, "Y");
 				cube_queue[i] = copy;
+				color_index = 1;
 			}
 			else if ((cube_queue_copy[cube_i]->getID() == "A")) {
 				Cube * copy = new Cube(faces_A, false, "A");
 				cube_queue[i] = copy;	
+				color_index = 2;
 			}
 			else if ((cube_queue_copy[cube_i]->getID() == "B")) {
 				Cube * copy = new Cube(faces_B, false, "B");
 				cube_queue[i] = copy;
+				color_index = 3;
 			}
 			//////////////////////////
 
@@ -362,6 +407,34 @@ public:
 			cube_queue[i]->is_hit = false;
 			cube_pos[i] = (cube_track);
 
+			//============= use different colors on cubes ===============
+			vec3 color_1 = vec3(1.0f, 1.0f, 1.0f);
+			vec3 color_2 = vec3(1.0f, 1.0f, 1.0f);
+			color_1 = aqua;
+			color_2 = aqua;
+			/*if (color_index == 0) {
+				cout << " x " << color_index << endl;
+				color_1 = aqua;
+				color_2 = aqua;
+			}
+			else if (color_index == 1) {
+				cout << " y " << color_index << endl;
+				color_1 = red;
+				color_2 = red;
+			}
+			else if (color_index == 2) {
+				cout << " A " << color_index << endl;
+				color_1 = yellow;
+				color_2 = purple;
+			}
+			else if (color_index == 3) {
+				cout << " b " << color_index << endl;
+				color_1 = aquamarine;
+				color_2 = red;
+			}*/
+
+			Particles * p_copy = new Particles(color_1, color_2);
+			particles_vec[i] = (p_copy);
 
 			cube_queue[i]->is_hit = false;
 			hit = false;
@@ -374,21 +447,22 @@ public:
 		mat4 S = scale(mat4(1.0f), vec3(0.1f, 0.1f, 0.1f));
 		
 		vec3 track;
-		for (int i = 0; i < 4; i++) {
+		for (int i = 0; i < cube_queue.size(); i++) {
 			track = vec3(cube_pos[i].x, cube_track.y, cube_pos[i].z);
-			mat4 T = translate(mat4(1.0f), track);
+			mat4 T = translate(mat4(1.0f), track);		
+
 			if (cube_queue[i]->is_hit == false) {
-				//cout << "cube" << endl;
+			
 				dropCubes(cube_queue[i], T, S, projection, view);
 			}
 			else {
-				// << "pa" << endl;
-				renderParticles(projection, view, cube_queue[i]->getToWorld());
+				vec3 temp = cube_queue[i]->getToWorld()[3];
+				
+				renderParticles(particles_vec[i], projection, view, cube_queue[i]->getToWorld());
 			}
-		}
-		
+		}		
 
-		cube_track.y -=  0.003;
+		cube_track.y -= speed * 0.004;
 	}
 
 

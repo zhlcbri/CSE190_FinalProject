@@ -93,10 +93,15 @@ vec3 not_my_head_pos;
 
 mat4 M_hand;
 mat4 M_not_my_hand;
+
+mat4 M_hand_right;
+mat4 M_not_my_hand_right;
+
 mat4 M_my_head;
 mat4 M_not_my_head;
 
 vec3 gogoPos;
+vec3 gogoPos_right;
 
 int flag_init = 0;
 ///////////////////////////////////////////////////////////////////////////////
@@ -853,9 +858,7 @@ protected:
 		mat4 T_not_my_hand = translate(mat4(1.0f), vec3(res.first.x, res.first.y, res.first.z));
 		//mat4 T_hand = translate(mat4(1.0f), handPos[0]);
 		mat4 S_hand = scale(mat4(1.0f), vec3(0.005, 0.005, 0.005));
-		
-		//mat4 S_hand = scale(mat4(1.0f), vec3(0.5, 0.5, 0.5));
-		
+	
 		mat4 R_hand = handRotation[0];
 		M_hand = T_hand * R_hand * S_hand;
 		M_not_my_hand = T_not_my_hand * R_hand*S_hand;
@@ -863,6 +866,25 @@ protected:
 		gameManager->renderHand(projection, inverse(headPose), M_hand);
 		gameManager->renderHand(projection, inverse(headPose), M_not_my_hand);
 
+		//================ right hand ================
+		// gogo algorithm
+		vec3 handForward_right = getForwardVector(handQuaternion[1]);
+		gogoPos_right = gameManager->gogoHand(handPos[1], inverse(headPose)[3], -(handForward_right));
+		/*vec3 not_my_hand = send_receive_hand_position(gogoPos_right);*/
+		pair<vec3, vec3> res_right = send_receive_hand_position(gogoPos_right, my_head_pos);
+		not_my_head_pos = res_right.second;
+
+		mat4 T_hand_right = translate(mat4(1.0f), gogoPos_right);
+		mat4 T_not_my_hand_right = translate(mat4(1.0f), vec3(res_right.first.x, res_right.first.y, res_right.first.z));
+		//mat4 T_hand_right = translate(mat4(1.0f), handPos[1]);
+		mat4 S_hand_right = scale(mat4(1.0f), vec3(0.005, 0.005, 0.005));
+
+		mat4 R_hand_right = handRotation[1];
+		M_hand_right = T_hand_right * R_hand_right * S_hand_right;
+		M_not_my_hand_right = T_not_my_hand_right * R_hand_right *S_hand_right;
+
+		gameManager->renderHand(projection, inverse(headPose), M_hand_right);
+		gameManager->renderHand(projection, inverse(headPose), M_not_my_hand_right);
 
 		//================= head =====================
 		M_my_head = translate(glm::mat4(1.0f), head);
@@ -885,24 +907,16 @@ protected:
 		//=========== particles =============
 		if (cube_track.y < -4.0) {
 			cube_track.y = 4.0;
-			speed += 1.0;
+			speed += 0.01;
 			
 			gameManager->calculate();
 		}
 		
-			//gameManager->dropCubes(T_cubeX, S_cubeX, projection, inverse(headPose));
-			gameManager->rainCubes(projection, inverse(headPose));
+		//gameManager->dropCubes(T_cubeX, S_cubeX, projection, inverse(headPose));
+		gameManager->rainCubes(projection, inverse(headPose));
 		
-
-			
-
-		
-
-
-
 		hand_track = handPos[0];
 		//cube_track.y -= 0.001;
-
 
 		//============== score ===============
 		gameManager->renderScore(projection, inverse(headPose));

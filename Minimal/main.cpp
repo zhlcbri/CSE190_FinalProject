@@ -73,7 +73,7 @@ using namespace std;
 using namespace glm;
 
 GameManager * gameManager;
-rpc::server srv(8080);
+rpc::server srv(7897);
 ////////////
 
 
@@ -776,16 +776,42 @@ int main(int argc, char ** argv) {
 	
 	pixel_data data1;
 	pixel_data data2;
-	data1.push_back({ 0,0,0 });//head
-	data1.push_back({ 0,0,0 });
-	data2.push_back({ 0,0,0 });
-	data2.push_back({ 0,0,0 });
+	data1.push_back({ 0,0,0 });//head position 0
+	data1.push_back({ 0,0,0 });//lefthand position 0
+	data1.push_back({ 0,0,0 });//right hand pos
+	data1.push_back({ 0,0,0 });//cube1 pos
+	data1.push_back({ 0,0,0 });//cube2 pos
+	data1.push_back({ 0,0,0 });//cube3 pos
+	data1.push_back({ 0,0,0 });//cube4 pos
+	data1.push_back({ 0,0,0 });//score value
+
+
+	data2.push_back({ 0,0,0 });//head position 0
+	data2.push_back({ 0,0,0 });//lefthand position 0
+	data2.push_back({ 0,0,0 });//right hand pos
+	data2.push_back({ 0,0,0 });//cube1 pos
+	data2.push_back({ 0,0,0 });//cube2 pos
+	data2.push_back({ 0,0,0 });//cube3 pos
+	data2.push_back({ 0,0,0 });//cube4 pos
+	data2.push_back({ 0,0,0 });//score value
 	int visit1 = 0, visit2 = 0;
 	try {
-		srv.bind("get_mandelbrot1", [&](double x, double y, double z,double a, double b, double c) {
+		srv.bind("get_mandelbrot1", [&](double a, double b, double c,double d, double e, double f,
+										double g, double h, double i, double j, double k, double l,
+										double m, double n, double o, double p, double q, double r,
+										double s, double t, double u, double v, double w, double x
+										) {
 
-			data1[0] = pixel({ x,y,z });//head
-			data1[1] = pixel({ a,b,c });
+			data1[0] = pixel({ a,b,c });//head
+			data1[1] = pixel({ d, e, f});
+			data1[2] = pixel({ g, h, i });
+			data1[3] = pixel({ j,k,l });//head
+			data1[4] = pixel({ m, n, o });
+			data1[5] = pixel({ p, q, r });
+			data1[6] = pixel({ s,t,u });//head
+			data1[7] = pixel({ v, v, v });//score
+			
+			
 			return data2;
 		});
 	}
@@ -793,10 +819,22 @@ int main(int argc, char ** argv) {
 		std::cout << std::endl << e.what() << std::endl;
 	}
 	try {
-		srv.bind("get_mandelbrot2", [&](double x, double y, double z, double a, double b, double c) {
+		srv.bind("get_mandelbrot2", [&](double a, double b, double c, double d, double e, double f,
+			double g, double h, double i, double j, double k, double l,
+			double m, double n, double o, double p, double q, double r,
+			double s, double t, double u, double v, double w, double x
+			) {
 
-			data2[0] = pixel({ x,y,z });
-			data2[1] = pixel({ a,b,c });
+			data2[0] = pixel({ a,b,c });//head
+			data2[1] = pixel({ d, e, f });
+			data2[2] = pixel({ g, h, i });
+			data2[3] = pixel({ j,k,l });//head
+			data2[4] = pixel({ m, n, o });
+			data2[5] = pixel({ p, q, r });
+			data2[6] = pixel({ s,t,u });//head
+			data2[7] = pixel({ v, w, x });
+			
+
 			return data1;
 		});
 	}

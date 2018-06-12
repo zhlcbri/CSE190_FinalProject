@@ -160,6 +160,7 @@
     <None Include="shader_cube.vert" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\CSE190_Client_2\CSE190_FinalProject\Minimal\Score.h" />
     <ClInclude Include="..\Gist-master\libs\kiss_fft130\kissfft.hh" />
     <ClInclude Include="..\Gist-master\libs\kiss_fft130\kiss_fft.h" />
     <ClInclude Include="..\Gist-master\libs\kiss_fft130\_kiss_fft_guts.h" />

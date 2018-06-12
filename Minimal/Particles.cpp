@@ -8,7 +8,7 @@
 using namespace std;
 using namespace glm;
 
-Particles::Particles()
+Particles::Particles(vec3 c1, vec3 c2)
 {   
     int index = 0;
     float offset = 0.5f;
@@ -26,6 +26,18 @@ Particles::Particles()
 
     life = 1;
     visible = 1;
+
+	static const GLfloat quadv[36] =
+	{
+		-0.05f,  0.05f, 0.0f, c2.x, c2.y, c2.z,
+		0.05f, -0.05f, 0.0f, c1.x, c1.y, c1.z,
+		-0.05f, -0.05f, 0.0f,  c2.x, c2.y, c2.z,
+
+		-0.05f,  0.05f, 0.0f, c1.x, c1.y, c1.z,
+		0.05f, -0.05f, 0.0f, c2.x, c2.y, c2.z,
+		0.05f,  0.05f,0.0f,  c1.x, c1.y, c1.z
+	};
+
     
     glGenBuffers(1, &instVBO);
 
@@ -61,18 +73,7 @@ Particles::Particles()
     // Unbind the VAO now so we don't accidentally tamper with it.
     glBindVertexArray(0);
 
-	// some colors I like
-	colors.push_back(vec3(1.000, 0.000, 0.000)); // red
-	colors.push_back(vec3(1.000, 0.078, 0.576)); // deep pink
-	colors.push_back(vec3(1.000, 1.000, 0.000)); // yellow
-	colors.push_back(vec3(0.502, 0.000, 0.502)); // purple
-	colors.push_back(vec3(0.294, 0.000, 0.510)); // indigo
-	colors.push_back(vec3(0.000, 1.000, 0.000)); // lime
-	colors.push_back(vec3(0.000, 1.000, 1.000)); // aqua
-	colors.push_back(vec3(0.498, 1.000, 0.831)); // aquamarine
-	colors.push_back(vec3(0.000, 0.749, 1.000)); // deep sky blue
-	colors.push_back(vec3(0.000, 0.000, 1.000)); // blue
-	colors.push_back(vec3(1.000, 0.941, 0.961)); // lavender blush
+	
 }
 
 void Particles::draw(Shader shader, const mat4 & projection, const mat4 & view, const mat4 & model, int index)
@@ -84,12 +85,6 @@ void Particles::draw(Shader shader, const mat4 & projection, const mat4 & view, 
 		shader.setMat4("view", view);
 		shader.setMat4("model", model);
 
-		if (index >= 0 && index < colors.size() - 1) {
-			shader.setVec3("color", colors.at(index));
-		}
-		// set random color
-		//int index = rand() % colors.size();
-		shader.setVec3("color", colors.at(0));
 
 		glBindVertexArray(quadVAO);
 		glDrawArraysInstanced(GL_TRIANGLES, 0, 6, 10000);

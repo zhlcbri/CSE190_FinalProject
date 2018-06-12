@@ -21,38 +21,28 @@
 #include "Shader.h"
 
 using namespace std;
+using namespace glm;
 
 class Particles
 {
+private:
+
+
 public:
-    Particles();
-    ~Particles();
-    
-    glm::vec3 translations[10000];
+	Particles(vec3, vec3);
+	~Particles();
 
-    void update();
-    int life;
-    int visible;
-    
-    void draw(Shader, const glm::mat4&, const glm::mat4&, const glm::mat4&, int);
-    void setVisible();
+	glm::vec3 translations[10000];
 
-    // These variables are needed for the shader program
-    GLuint quadVAO, quadVBO, instVBO, transVBO;
-    GLuint uProjection, uModelview, uView, uModel;
+	void update();
+	int life;
+	int visible;
 
-	// beautiful colors sent to shader randomly
-	vector<glm::vec3> colors;
-};
+	void draw(Shader, const glm::mat4&, const glm::mat4&, const glm::mat4&, int);
+	void setVisible();
 
-static const GLfloat quadv[] =
-{
-    -0.05f,  0.05f, 0.0f, 0.000, 1.000, 1.000,
-    0.05f, -0.05f, 0.0f, 1.000, 0.078, 0.576,
-    -0.05f, -0.05f, 0.0f,  0.000, 1.000, 1.000,
-    
-    -0.05f,  0.05f, 0.0f, 1.000, 0.078, 0.576,
-    0.05f, -0.05f, 0.0f, 0.000, 1.000, 1.000,
-    0.05f,  0.05f,0.0f,  1.000, 0.078, 0.576
+	// These variables are needed for the shader program
+	GLuint quadVAO, quadVBO, instVBO, transVBO;
+	GLuint uProjection, uModelview, uView, uModel;
 };
 #endif

@@ -155,5 +155,8 @@
     <ClInclude Include="Vector3d.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\CSE190_Client_2\CSE190_FinalProject\Minimal\Score.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
